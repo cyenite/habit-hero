@@ -40,7 +40,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SocialAuthRepository _socialAuthRepository;
 
   AuthNotifier(this._authRepository, this._socialAuthRepository)
-      : super(AuthState());
+      : super(AuthState()) {
+    _initialize();
+  }
 
   void _initialize() {
     final user = _authRepository.currentUser;
@@ -54,12 +56,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     _authRepository.authStateChanges.listen((event) {
-      state = state.copyWith(
-        status: event.session != null
-            ? AuthStatus.authenticated
-            : AuthStatus.unauthenticated,
-        user: event.session?.user,
-      );
+      if (event.session != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: event.session?.user,
+        );
+      } else {
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          user: null,
+        );
+      }
     });
   }
 
@@ -69,14 +76,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }) async {
     try {
       state = state.copyWith(status: AuthStatus.loading);
+
       final response = await _authRepository.signIn(
         email: email,
         password: password,
       );
-      if (response.user != null) {
+
+      if (response.user != null && response.session != null) {
         state = state.copyWith(
           status: AuthStatus.authenticated,
           user: response.user,
+          errorMessage: null,
+        );
+      } else {
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          errorMessage: 'Failed to sign in',
         );
       }
     } catch (e) {
@@ -131,16 +146,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> signInWithGoogle() async {
     try {
       state = state.copyWith(status: AuthStatus.loading);
-      await _socialAuthRepository.signInWithGoogle();
-      state = state.copyWith(
-        status: AuthStatus.authenticated,
-        user: _authRepository.currentUser,
-      );
+      final response = await _socialAuthRepository.signInWithGoogle();
+
+      if (response.user != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: response.user,
+          errorMessage: null,
+        );
+      } else {
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          errorMessage: 'Failed to sign in with Google',
+        );
+      }
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
         errorMessage: e.toString(),
       );
     }
+  }
+
+  Future<void> initializeAuth() async {
+    await _authRepository.restoreSession();
+    _initialize();
   }
 }

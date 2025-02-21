@@ -7,32 +7,14 @@ class GoogleSignInButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return OutlinedButton(
-      onPressed: () {
+    return InkWell(
+      onTap: () {
         ref.read(authStateProvider.notifier).signInWithGoogle();
       },
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outline,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/google_logo.png',
-            height: 24,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Continue with Google',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ],
+      child: Image.asset(
+        'assets/images/google-signin.png',
+        height: 48,
+        width: MediaQuery.of(context).size.width,
       ),
     );
   }

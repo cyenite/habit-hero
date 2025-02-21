@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class AnimatedButton extends StatefulWidget {
   final VoidCallback onPressed;
   final String text;
+  final bool isLoading;
 
   const AnimatedButton({
     super.key,
     required this.onPressed,
     required this.text,
+    this.isLoading = false,
   });
 
   @override
@@ -56,11 +58,12 @@ class _AnimatedButtonState extends State<AnimatedButton>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      onTap: widget.onPressed,
+      onTapDown: widget.isLoading ? null : _handleTapDown,
+      onTapUp: widget.isLoading ? null : _handleTapUp,
+      onTapCancel: widget.isLoading ? null : _handleTapCancel,
+      onTap: widget.isLoading ? null : widget.onPressed,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {
@@ -70,30 +73,44 @@ class _AnimatedButtonState extends State<AnimatedButton>
               width: double.infinity,
               height: 55,
               decoration: BoxDecoration(
+                border: Border.all(
+                  color: colorScheme.onSurface.withOpacity(0.1),
+                ),
                 gradient: LinearGradient(
                   colors: [
-                    Colors.white.withOpacity(0.15),
-                    Colors.white.withOpacity(0.25),
+                    colorScheme.primary.withOpacity(0.15),
+                    colorScheme.primary.withOpacity(0.25),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+                    color: colorScheme.onSurface.withOpacity(0.1),
+                    blurRadius: 2,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: Center(
-                child: Text(
-                  widget.text,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: widget.isLoading
+                    ? SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.onSurface,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        widget.text,
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
           );

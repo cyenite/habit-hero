@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habit_tracker/features/splash/presentation/controllers/splash_controller.dart';
+import 'package:habit_tracker/features/splash/presentation/widgets/splash_view.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
+class _SplashPageState extends ConsumerState<SplashPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _initializeAnimations();
+    _controller.forward();
+  }
+
+  void _initializeAnimations() {
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -28,8 +34,10 @@ class _SplashPageState extends State<SplashPage>
         curve: Curves.easeIn,
       ),
     );
+  }
 
-    _controller.forward();
+  void _handleAnimationLoaded(dynamic composition) {
+    _controller.duration = composition.duration;
   }
 
   @override
@@ -40,57 +48,14 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final splashController = ref.watch(splashControllerProvider);
+    splashController.navigateToNextScreen(context);
+
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.surfaceBright,
-              Theme.of(context).colorScheme.surface,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 200,
-                    child: Lottie.asset(
-                      'assets/animations/habits.json',
-                      controller: _controller,
-                      onLoaded: (composition) {
-                        _controller.duration = composition.duration;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Habit Hero',
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Transform your life, one habit at a time',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+      body: SplashView(
+        controller: _controller,
+        fadeAnimation: _fadeAnimation,
+        onAnimationLoaded: _handleAnimationLoaded,
       ),
     );
   }

@@ -5,6 +5,7 @@ class CustomTextField extends StatefulWidget {
   final String hintText;
   final IconData icon;
   final bool isPassword;
+  final bool enabled;
 
   const CustomTextField({
     super.key,
@@ -12,6 +13,7 @@ class CustomTextField extends StatefulWidget {
     required this.hintText,
     required this.icon,
     this.isPassword = false,
+    this.enabled = true,
   });
 
   @override
@@ -23,26 +25,32 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: colorScheme.surface.withOpacity(widget.enabled ? 0.5 : 0.3),
         borderRadius: BorderRadius.circular(15),
+        border: isDarkMode ? Border.all(color: Colors.white, width: 0.2) : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: TextField(
         controller: widget.controller,
         obscureText: widget.isPassword && _obscureText,
-        style: const TextStyle(color: Colors.white),
+        enabled: widget.enabled,
+        style: TextStyle(color: colorScheme.onSurface),
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: widget.hintText,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-          icon: Icon(widget.icon, color: Colors.white.withOpacity(0.7)),
+          hintStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
+          icon:
+              Icon(widget.icon, color: colorScheme.onSurface.withOpacity(0.7)),
           suffixIcon: widget.isPassword
               ? IconButton(
                   icon: Icon(
                     _obscureText ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.white.withOpacity(0.7),
+                    color: colorScheme.onSurface.withOpacity(0.7),
                   ),
                   onPressed: () {
                     setState(() {

@@ -1,17 +1,31 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:habit_tracker/core/config/supabase_config.dart';
+import 'dart:developer' as dev;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:habit_tracker/features/habits/data/adapters/adapters.dart';
+import 'package:habit_tracker/features/habits/data/repositories/local_storage_repository.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class ServiceLocator {
   static Future<void> initialize() async {
-    await SupabaseConfig.initialize();
+    dev.log('Initializing services');
 
-    await Future.wait([
-      SharedPreferences.getInstance(),
-      Supabase.initialize(
-        url: SupabaseConfig.url,
-        anonKey: SupabaseConfig.anonKey,
-      ),
-    ]);
+    // Initialize Hive first
+    await Hive.initFlutter();
+
+    await SupabaseConfig.initialize();
+    await dotenv.load();
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    );
+    await SharedPreferences.getInstance();
+
+    // Initialize local storage after Hive is ready
+    final localStorage = LocalStorageRepository();
+    await localStorage.initialize();
+
+    dev.log('Services initialized');
   }
 }

@@ -12,25 +12,48 @@ class SocialAuthRepository {
 
   Future<AuthResponse> signInWithGoogle() async {
     try {
-      // Start the Google sign-in flow
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) throw 'Google sign in cancelled';
 
-      // Get auth details from request
       final googleAuth = await googleUser.authentication;
 
-      // Create Google OAuth credential
       final idToken = googleAuth.idToken;
       if (idToken == null) throw 'No ID token found';
 
-      // Sign in to Supabase with Google OAuth credential
-      return await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: googleAuth.accessToken,
-      );
+      int retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount < maxRetries) {
+        try {
+          return await _supabase.auth
+              .signInWithIdToken(
+                provider: OAuthProvider.google,
+                idToken: idToken,
+                accessToken: googleAuth.accessToken,
+              )
+              .timeout(
+                const Duration(seconds: 10),
+                onTimeout: () => throw 'Connection timeout',
+              );
+        } catch (e) {
+          retryCount++;
+          if (retryCount == maxRetries) {
+            throw 'Failed to connect to authentication service after $maxRetries attempts. Please check your internet connection and try again.';
+          }
+          await Future.delayed(Duration(seconds: retryCount));
+        }
+      }
+
+      throw 'Unexpected error during authentication';
     } catch (error) {
+      if (error.toString().contains('timeout')) {
+        throw 'Connection timeout. Please check your internet connection and try again.';
+      }
       throw 'Failed to sign in with Google: $error';
+    } finally {
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
     }
   }
 }

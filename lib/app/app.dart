@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:habit_tracker/features/auth/presentation/pages/auth_page.dart';
 import 'package:habit_tracker/features/auth/presentation/providers/auth_providers.dart';
-import 'package:habit_tracker/features/auth/presentation/state/auth_state.dart';
-import 'package:habit_tracker/features/habits/presentation/pages/home_page.dart';
 import 'package:habit_tracker/features/splash/presentation/pages/splash_page.dart';
 import 'package:habit_tracker/core/providers/theme_provider.dart';
+import 'package:habit_tracker/core/services/service_locator.dart';
 
 final initializationProvider = FutureProvider<void>((ref) async {
-  // Simulate some initialization time
-  await Future.delayed(const Duration(seconds: 3));
+  await ServiceLocator.initialize();
+  await ref.read(authStateProvider.notifier).initializeAuth();
 });
 
 class HabitTrackerApp extends ConsumerWidget {
@@ -18,8 +16,6 @@ class HabitTrackerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final initialization = ref.watch(initializationProvider);
-    final authState = ref.watch(authStateProvider);
     final isDarkMode = ref.watch(themeProvider);
 
     return MaterialApp(
@@ -28,11 +24,10 @@ class HabitTrackerApp extends ConsumerWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF34C759), // Soft green as primary
+          seedColor: const Color(0xFF34C759),
           primary: const Color(0xFF34C759),
-          secondary: const Color(0xFF5856D6), // Soft purple
-          tertiary: const Color(0xFF007AFF), // Classic iOS blue
-          surface: const Color(0xFFFFFFFF),
+          secondary: const Color(0xFF5856D6),
+          tertiary: const Color(0xFF007AFF),
         ).copyWith(
           shadow: const Color(0xFF8E8E93).withOpacity(0.15),
         ),
@@ -47,12 +42,10 @@ class HabitTrackerApp extends ConsumerWidget {
       darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
         colorScheme: ColorScheme.fromSeed(
           brightness: Brightness.dark,
-          seedColor:
-              const Color(0xFF30D158), // Slightly brighter green for dark mode
+          seedColor: const Color(0xFF30D158),
           primary: const Color(0xFF30D158),
-          secondary: const Color(0xFF5E5CE6), // Adjusted purple for dark mode
-          tertiary: const Color(0xFF0A84FF), // Adjusted blue for dark mode
-          surface: const Color(0xFF1C1C1E),
+          secondary: const Color(0xFF5E5CE6),
+          tertiary: const Color(0xFF0A84FF),
         ).copyWith(
           shadow: const Color(0xFF000000).withOpacity(0.2),
         ),
@@ -65,13 +58,7 @@ class HabitTrackerApp extends ConsumerWidget {
           bodyMedium: const TextStyle(color: Color(0xFFEBEBF5)),
         ),
       ),
-      home: initialization.when(
-        data: (_) => authState.status == AuthStatus.authenticated
-            ? const HomePage()
-            : const AuthPage(),
-        loading: () => const SplashPage(),
-        error: (error, stack) => const AuthPage(),
-      ),
+      home: const SplashPage(),
     );
   }
 }
