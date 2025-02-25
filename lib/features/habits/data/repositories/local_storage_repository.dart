@@ -3,19 +3,36 @@ import 'package:habit_tracker/features/habits/domain/models/habit.dart';
 import 'package:habit_tracker/features/habits/data/adapters/adapters.dart';
 
 class LocalStorageRepository {
-  static const String _habitsBoxName = 'habits';
-  static const String _syncQueueBoxName = 'sync_queue';
+  static LocalStorageRepository? _instance;
+  static bool _initialized = false;
 
   late Box<Habit> _habitsBox;
   late Box<Map> _syncQueueBox;
 
+  static const String _habitsBoxName = 'habits';
+  static const String _syncQueueBoxName = 'sync_queue';
+
+  // Private constructor
+  LocalStorageRepository._();
+
+  static LocalStorageRepository get instance {
+    _instance ??= LocalStorageRepository._();
+    return _instance!;
+  }
+
+  static bool get isInitialized => _initialized;
+
   Future<void> initialize() async {
+    if (_initialized) return;
+
     Hive.registerAdapter(HabitAdapter());
     Hive.registerAdapter(HabitFrequencyAdapter());
     Hive.registerAdapter(TimeOfDayAdapter());
 
     _habitsBox = await Hive.openBox<Habit>(_habitsBoxName);
     _syncQueueBox = await Hive.openBox<Map>(_syncQueueBoxName);
+
+    _initialized = true;
   }
 
   Future<List<Habit>> getHabits() async {

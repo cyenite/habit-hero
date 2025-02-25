@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:habit_tracker/features/habits/domain/validators/habit_validator.dart';
 
 part 'habit.g.dart';
+
+SupabaseClient get supabase => Supabase.instance.client;
 
 @HiveType(typeId: 0)
 enum HabitFrequency {
@@ -49,10 +53,10 @@ class Habit {
   final int iconData;
 
   @HiveField(11)
-  final int colorValue;
+  final String colorValue;
 
   IconData get icon => IconData(iconData, fontFamily: 'MaterialIcons');
-  Color get color => Color(colorValue);
+  Color get color => Color(int.parse(colorValue));
 
   Habit({
     required this.id,
@@ -68,7 +72,16 @@ class Habit {
     IconData icon = Icons.star,
     required Color color,
   })  : iconData = icon.codePoint,
-        colorValue = color.value;
+        colorValue = color.value.toString() {
+    // Validate the habit data
+    HabitValidator.validate(
+      name: name,
+      description: description,
+      frequency: frequency,
+      selectedDays: selectedDays,
+      reminderTime: reminderTime,
+    );
+  }
 
   Habit copyWith({
     String? id,
@@ -106,37 +119,68 @@ class Habit {
       'name': name,
       'description': description,
       'frequency': frequency.index,
-      'selectedDays': selectedDays,
-      'reminderTime': {
+      'selected_days': selectedDays,
+      'reminder_time': {
         'hour': reminderTime.hour,
         'minute': reminderTime.minute,
       },
-      'createdAt': createdAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
       'streak': streak,
       'level': level,
       'progress': progress,
-      'iconData': iconData,
-      'colorValue': colorValue,
+      'icon_data': iconData,
+      'color_value': colorValue,
+      'user_id': supabase.auth.currentUser?.id,
     };
   }
 
   factory Habit.fromJson(Map<String, dynamic> json) {
+    final colorValue = json['color_value'];
+    final color = colorValue is String
+        ? Color(int.parse(colorValue))
+        : Color(colorValue as int);
+
+    final progress = json['progress'];
+    final progressValue =
+        progress is int ? progress.toDouble() : progress as double;
+
     return Habit(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
       frequency: HabitFrequency.values[json['frequency'] as int],
-      selectedDays: (json['selectedDays'] as List).cast<bool>(),
+      selectedDays: (json['selected_days'] as List).cast<bool>(),
       reminderTime: TimeOfDay(
-        hour: (json['reminderTime'] as Map)['hour'] as int,
-        minute: (json['reminderTime'] as Map)['minute'] as int,
+        hour: (json['reminder_time'] as Map)['hour'] as int,
+        minute: (json['reminder_time'] as Map)['minute'] as int,
       ),
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
       streak: json['streak'] as int,
       level: json['level'] as int,
-      progress: json['progress'] as double,
-      icon: IconData(json['iconData'] as int, fontFamily: 'MaterialIcons'),
-      color: Color(json['colorValue'] as int),
+      progress: progressValue,
+      icon: IconData(json['icon_data'] as int, fontFamily: 'MaterialIcons'),
+      color: color,
     );
+  }
+
+  // Add a validation method for the UI
+  static String? validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Habit name cannot be empty';
+    }
+    if (value.trim().length < 3) {
+      return 'Habit name must be at least 3 characters';
+    }
+    if (value.trim().length > 50) {
+      return 'Habit name cannot exceed 50 characters';
+    }
+    return null;
+  }
+
+  static String? validateDescription(String? value) {
+    if (value != null && value.length > 500) {
+      return 'Description cannot exceed 500 characters';
+    }
+    return null;
   }
 }

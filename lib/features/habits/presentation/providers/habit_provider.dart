@@ -5,7 +5,7 @@ import 'package:habit_tracker/features/habits/domain/models/habit.dart';
 import 'package:habit_tracker/features/auth/presentation/providers/auth_providers.dart';
 
 final localStorageProvider = Provider<LocalStorageRepository>((ref) {
-  return LocalStorageRepository();
+  return LocalStorageRepository.instance;
 });
 
 final habitRepositoryProvider = Provider<HabitRepository>((ref) {

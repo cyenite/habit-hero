@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:habit_tracker/core/config/supabase_config.dart';
 import 'dart:developer' as dev;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:habit_tracker/features/habits/data/adapters/adapters.dart';
 import 'package:habit_tracker/features/habits/data/repositories/local_storage_repository.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -23,8 +22,7 @@ class ServiceLocator {
     await SharedPreferences.getInstance();
 
     // Initialize local storage after Hive is ready
-    final localStorage = LocalStorageRepository();
-    await localStorage.initialize();
+    await LocalStorageRepository.instance.initialize();
 
     dev.log('Services initialized');
   }

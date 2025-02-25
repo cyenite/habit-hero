@@ -209,11 +209,11 @@ class _AddHabitPageState extends ConsumerState<AddHabitPage> {
                 hintText: 'e.g., Morning Run',
                 border: OutlineInputBorder(),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a habit name';
-                }
-                return null;
+              validator: Habit.validateName,
+              maxLength: 50,
+              buildCounter: (context,
+                  {required currentLength, required isFocused, maxLength}) {
+                return Text('$currentLength/$maxLength');
               },
             ),
             const SizedBox(height: 16),
@@ -224,7 +224,13 @@ class _AddHabitPageState extends ConsumerState<AddHabitPage> {
                 hintText: 'Add some details about your habit',
                 border: OutlineInputBorder(),
               ),
+              validator: Habit.validateDescription,
+              maxLength: 500,
               maxLines: 3,
+              buildCounter: (context,
+                  {required currentLength, required isFocused, maxLength}) {
+                return Text('$currentLength/$maxLength');
+              },
             ),
             const SizedBox(height: 24),
             Text(

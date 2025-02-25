@@ -16,6 +16,12 @@ class HabitAdapter extends TypeAdapter<Habit> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
+
+    // Convert color value to string if it's an int
+    final colorValue = fields[11];
+    final colorValueString =
+        colorValue is int ? colorValue.toString() : colorValue;
+
     return Habit(
       id: fields[0] as String,
       name: fields[1] as String,
@@ -28,7 +34,7 @@ class HabitAdapter extends TypeAdapter<Habit> {
       level: fields[8] as int,
       progress: fields[9] as double,
       icon: IconData(fields[10] as int, fontFamily: 'MaterialIcons'),
-      color: Color(fields[11] as int),
+      color: Color(int.parse(colorValueString as String)),
     );
   }
 
