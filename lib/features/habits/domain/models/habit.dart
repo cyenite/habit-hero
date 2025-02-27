@@ -79,7 +79,7 @@ class Habit {
   final HabitFrequency frequency;
 
   @HiveField(4)
-  final List<bool> selectedDays; // For weekly habits
+  final List<bool> selectedDays;
 
   @HiveField(5)
   final TimeOfDay reminderTime;
@@ -138,7 +138,6 @@ class Habit {
         iconData = icon.codePoint,
         colorValue = color.value.toString(),
         createdAt = createdAt ?? DateTime.now() {
-    // Validate the habit data
     HabitValidator.validate(
       name: name,
       description: description,

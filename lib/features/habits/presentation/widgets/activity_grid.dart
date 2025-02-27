@@ -45,7 +45,7 @@ class ActivityGrid extends ConsumerWidget {
                 .toList();
 
             // Calculate daily completion rate
-            final dailyCompletionRate = habits.length > 0
+            final dailyCompletionRate = habits.isNotEmpty
                 ? todaysCompletions.length / habits.length
                 : 0.0;
 
@@ -78,7 +78,7 @@ class ActivityGrid extends ConsumerWidget {
                       categoryHabits.any((h) => h.id == completion.habitId))
                   .length;
 
-              final progress = categoryHabits.length > 0
+              final progress = categoryHabits.isNotEmpty
                   ? categoryCompletions / categoryHabits.length
                   : 0.0;
 
@@ -168,27 +168,28 @@ class ActivityGrid extends ConsumerWidget {
     if (habit.icon == Icons.directions_run ||
         habit.icon == Icons.fitness_center ||
         habit.icon == Icons.self_improvement) {
-      return HabitCategory('Fitness', Icons.fitness_center, Colors.orange);
+      return const HabitCategory(
+          'Fitness', Icons.fitness_center, Colors.orange);
     }
 
     if (habit.icon == Icons.book ||
         habit.icon == Icons.menu_book ||
         habit.icon == Icons.text_snippet) {
-      return HabitCategory('Reading', Icons.book, Colors.blue);
+      return const HabitCategory('Reading', Icons.book, Colors.blue);
     }
 
     if (habit.icon == Icons.water_drop || habit.icon == Icons.local_drink) {
-      return HabitCategory('Health', Icons.favorite, Colors.pink);
+      return const HabitCategory('Health', Icons.favorite, Colors.pink);
     }
 
     if (habit.icon == Icons.restaurant || habit.icon == Icons.food_bank) {
-      return HabitCategory('Nutrition', Icons.restaurant, Colors.green);
+      return const HabitCategory('Nutrition', Icons.restaurant, Colors.green);
     }
 
     if (habit.icon == Icons.computer ||
         habit.icon == Icons.work ||
         habit.icon == Icons.school) {
-      return HabitCategory('Productivity', Icons.computer, Colors.purple);
+      return const HabitCategory('Productivity', Icons.computer, Colors.purple);
     }
 
     // Default category

@@ -13,7 +13,6 @@ class HabitRepository {
 
   final bool _localOnly = false;
 
-  // Add new fields
   final _achievementsBox = 'achievements';
   final _challengesBox = 'challenges';
 
@@ -305,8 +304,6 @@ class HabitRepository {
     }
   }
 
-  // Add new methods for achievements and challenges
-
   Future<List<Achievement>> getAchievements() async {
     try {
       final achievements =
@@ -405,7 +402,6 @@ class HabitRepository {
       }
     }
 
-    // Return new achievements that were unlocked
     return unlockedAchievements;
   }
 

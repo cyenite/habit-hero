@@ -4,7 +4,7 @@ import 'package:habit_tracker/features/gamification/domain/models/achievement.da
 
 class AchievementAdapter extends TypeAdapter<Achievement> {
   @override
-  final int typeId = 5; // Change from 3 to 5
+  final int typeId = 5;
 
   @override
   Achievement read(BinaryReader reader) {

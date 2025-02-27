@@ -118,13 +118,6 @@ class ProfilePage extends ConsumerWidget {
                   ],
                 ),
               ),
-              // Edit button
-              IconButton.filledTonal(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  // TODO(Ron): Implement edit profile
-                },
-              ),
             ],
           );
         },
@@ -152,13 +145,6 @@ class ProfilePage extends ConsumerWidget {
               title: 'General',
               items: [
                 SettingsItem(
-                  icon: Icons.notifications,
-                  title: 'Notifications',
-                  onTap: () {
-                    // TODO(Ron): Implement notifications settings
-                  },
-                ),
-                SettingsItem(
                   icon: currentTheme == ThemeMode.dark
                       ? Icons.dark_mode
                       : Icons.light_mode,
@@ -170,27 +156,6 @@ class ProfilePage extends ConsumerWidget {
                     );
                   },
                 ),
-                SettingsItem(
-                  icon: Icons.language,
-                  title: 'Language',
-                  onTap: () {},
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            SettingsSection(
-              title: 'Data',
-              items: [
-                SettingsItem(
-                  icon: Icons.backup,
-                  title: 'Backup & Restore',
-                  onTap: () {},
-                ),
-                SettingsItem(
-                  icon: Icons.import_export,
-                  title: 'Export Data',
-                  onTap: () {},
-                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -200,12 +165,52 @@ class ProfilePage extends ConsumerWidget {
                 SettingsItem(
                   icon: Icons.info,
                   title: 'App Info',
-                  onTap: () {},
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('App Info'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Habit Tracker',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              Text(
+                                'Version 1.0.0',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              Text(
+                                'Developed by Ron for the Solutech Interview',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                                onPressed: () {}, child: const Text('OK')),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
                 SettingsItem(
                   icon: Icons.privacy_tip,
                   title: 'Privacy Policy',
-                  onTap: () {},
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const AlertDialog(
+                          title: Text('Privacy Policy'),
+                          content: Text('Privacy Policy'),
+                        );
+                      },
+                    );
+                  },
                 ),
               ],
             ),

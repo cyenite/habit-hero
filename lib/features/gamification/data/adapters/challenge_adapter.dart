@@ -4,7 +4,7 @@ import 'package:habit_tracker/features/gamification/domain/models/challenge.dart
 
 class ChallengeAdapter extends TypeAdapter<Challenge> {
   @override
-  final int typeId = 4; // Use a unique ID
+  final int typeId = 4;
 
   @override
   Challenge read(BinaryReader reader) {

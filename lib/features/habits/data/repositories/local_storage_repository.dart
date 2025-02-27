@@ -35,8 +35,6 @@ class LocalStorageRepository {
     Hive.registerAdapter(HabitFrequencyAdapter());
     Hive.registerAdapter(TimeOfDayAdapter());
     Hive.registerAdapter(completion_adapter.HabitCompletionAdapter());
-
-    // Register new adapters
     Hive.registerAdapter(AchievementAdapter());
     Hive.registerAdapter(ChallengeAdapter());
 
@@ -66,7 +64,6 @@ class LocalStorageRepository {
   }
 
   Future<void> deleteHabit(String id) async {
-    // Delete all completions for this habit
     final completions = await getCompletionsForHabit(id);
     for (final completion in completions) {
       await _completionsBox.delete(completion.id);
@@ -76,7 +73,6 @@ class LocalStorageRepository {
     await _addToSyncQueue('delete', {'id': id});
   }
 
-  // Habit Completion methods
   Future<List<HabitCompletion>> getAllCompletions() async {
     return _completionsBox.values.toList();
   }
