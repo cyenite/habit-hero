@@ -1,7 +1,5 @@
 # Habit Hero
 
-![Habit Hero Logo](assets/images/app_icon.png)
-
 **Transform your life, one habit at a time**
 
 Habit Hero is a comprehensive habit tracking application built with Flutter that helps users build positive habits, track their progress, and stay motivated through gamification elements.
@@ -40,6 +38,9 @@ Habit Hero is a comprehensive habit tracking application built with Flutter that
 |-----------|------------|---------|
 | ![Add Habit](assets/screenshots/sc8.png) | ![Statistics](assets/screenshots/sc9.png) | ![Profile](assets/screenshots/sc11.png) |
 
+| Dashboard (Dark Mode) | Weekly Overview (Dark Mode) | Habit Details (Dark Mode) |
+|---------------|-----------|------------|
+| ![Splash](assets/screenshots/sc2.png) | ![Dashboard](assets/screenshots/sc4.png) | ![Habits](assets/screenshots/sc6.png) |
 
 ## 🚀 Getting Started
 
@@ -80,22 +81,6 @@ Habit Hero is a comprehensive habit tracking application built with Flutter that
 ### Authentication
 - **Supabase Auth**: Email/password authentication
 - **Google Sign-In**: OAuth integration
-
-## 📐 Project Structure
-
-The application follows clean architecture principles with clear separation of concerns:
-lib/
-├── app/ # App configuration and initialization
-├── core/ # Core utilities, services, and widgets
-│ ├── providers/ # Global providers
-│ ├── services/ # Service layer
-│ └── widgets/ # Reusable widgets
-├── features/ # Feature modules
-│ ├── auth/ # Authentication feature
-│ ├── habits/ # Habits management feature
-│ ├── gamification/ # Gamification feature
-│ └── splash/ # Splash screen feature
-└── main.dart # Application entry point
 
 
 ## 🔄 Data Synchronization
