@@ -10,9 +10,7 @@ class ServiceLocator {
   static Future<void> initialize() async {
     dev.log('Initializing services');
 
-    // Initialize Hive first
     await Hive.initFlutter();
-
     await SupabaseConfig.initialize();
     await dotenv.load();
     await Supabase.initialize(
@@ -20,8 +18,6 @@ class ServiceLocator {
       anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
     );
     await SharedPreferences.getInstance();
-
-    // Initialize local storage after Hive is ready
     await LocalStorageRepository.instance.initialize();
 
     dev.log('Services initialized');

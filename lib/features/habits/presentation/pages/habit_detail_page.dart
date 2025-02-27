@@ -87,7 +87,6 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
                 builder: (context) => EditHabitPage(habit: habit),
               ),
             ).then((_) {
-              // Explicitly ignore the return value
               _ = ref.refresh(habitByIdProvider(widget.habitId));
             });
             break;
@@ -168,7 +167,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${habit.reminderTime.format(context)}',
+                      habit.reminderTime.format(context),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -312,44 +311,37 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
     AsyncValue<List<HabitCompletion>> completionsAsync,
     String habitId,
   ) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Completion Calendar',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          completionsAsync.when(
-            data: (completions) => CalendarView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Habit History',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 16),
+        completionsAsync.when(
+          data: (completions) {
+            return CalendarView(
               completions: completions,
               habitId: habitId,
-            ),
-            loading: () => const Center(
+            );
+          },
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
               child: CircularProgressIndicator(),
             ),
-            error: (_, __) => const Center(
-              child: Text('Error loading completions'),
+          ),
+          error: (error, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error loading completions: $error'),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -435,6 +427,8 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
             ),
             FilledButton(
               onPressed: () {
+                final dialogContext = context;
+
                 ref
                     .read(habitsProvider.notifier)
                     .completeHabit(
@@ -445,7 +439,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
                     )
                     .then((_) {
                   if (mounted) {
-                    Navigator.pop(context);
+                    Navigator.pop(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -486,8 +480,8 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
           FilledButton(
             onPressed: () {
               ref.read(habitsProvider.notifier).deleteHabit(habit.id).then((_) {
-                Navigator.pop(context); // Close dialog
-                Navigator.pop(context); // Go back to habits list
+                Navigator.pop(context);
+                Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Habit "${habit.name}" deleted'),

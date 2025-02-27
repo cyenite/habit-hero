@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:habit_tracker/features/habits/presentation/pages/add_habit_page.dart';
-import 'package:habit_tracker/features/habits/presentation/widgets/habit_card.dart';
+import 'package:habit_tracker/features/habits/domain/models/habit.dart';
 import 'package:habit_tracker/features/habits/presentation/providers/habit_provider.dart';
+import 'package:habit_tracker/features/habits/presentation/pages/add_habit_page.dart';
+import 'package:habit_tracker/features/habits/presentation/pages/habit_detail_page.dart';
 import 'package:habit_tracker/core/widgets/error_view.dart';
 
 class HabitsPage extends ConsumerWidget {
@@ -10,7 +11,7 @@ class HabitsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final habitsState = ref.watch(habitsProvider);
+    final habitsAsync = ref.watch(habitsProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -134,7 +135,7 @@ class HabitsPage extends ConsumerWidget {
             ),
             SliverPadding(
               padding: const EdgeInsets.all(16),
-              sliver: habitsState.when(
+              sliver: habitsAsync.when(
                 data: (habits) {
                   if (habits.isEmpty) {
                     return SliverFillRemaining(
@@ -187,10 +188,7 @@ class HabitsPage extends ConsumerWidget {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final habit = habits[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: HabitCard(habit: habit),
-                        );
+                        return _buildHabitCard(context, ref, habit);
                       },
                       childCount: habits.length,
                     ),
@@ -216,5 +214,137 @@ class HabitsPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildHabitCard(BuildContext context, WidgetRef ref, Habit habit) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HabitDetailPage(habitId: habit.id),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: habit.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  habit.icon,
+                  color: habit.color,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      habit.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getFrequencyText(habit),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildStreakBadge(context, habit),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 60,
+                    height: 6,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: habit.progress,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStreakBadge(BuildContext context, Habit habit) {
+    if (habit.streak == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.local_fire_department,
+            color: Colors.orange,
+            size: 14,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            '${habit.streak}',
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.orange,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getFrequencyText(Habit habit) {
+    switch (habit.frequency) {
+      case HabitFrequency.daily:
+        return 'Daily • ${habit.reminderTime.hour}:${habit.reminderTime.minute.toString().padLeft(2, '0')}';
+      case HabitFrequency.weekly:
+        final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        final selectedDays = <String>[];
+
+        for (int i = 0; i < habit.selectedDays.length; i++) {
+          if (habit.selectedDays[i]) {
+            selectedDays.add(days[i]);
+          }
+        }
+
+        return '${selectedDays.join(', ')} • ${habit.reminderTime.hour}:${habit.reminderTime.minute.toString().padLeft(2, '0')}';
+      case HabitFrequency.monthly:
+        return 'Monthly • ${habit.reminderTime.hour}:${habit.reminderTime.minute.toString().padLeft(2, '0')}';
+      default:
+        return 'Custom';
+    }
   }
 }

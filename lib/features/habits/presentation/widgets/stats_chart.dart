@@ -1,170 +1,177 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:habit_tracker/features/habits/domain/models/habit.dart';
+import 'package:habit_tracker/features/habits/presentation/providers/habit_provider.dart';
+import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 class StatsChart extends ConsumerWidget {
-  const StatsChart({super.key});
+  const StatsChart({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final habitsAsync = ref.watch(habitsProvider);
+    final completionsAsync = ref.watch(allCompletionsProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Column(
-          children: [
-            Expanded(
-              child: LineChart(
-                LineChartData(
-                  gridData: const FlGridData(show: false),
-                  titlesData: FlTitlesData(
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          const days = [
-                            'Mon',
-                            'Tue',
-                            'Wed',
-                            'Thu',
-                            'Fri',
-                            'Sat',
-                            'Sun'
-                          ];
-                          if (value >= 0 && value < days.length) {
-                            return Text(
-                              days[value.toInt()],
-                              style: TextStyle(
-                                color: colorScheme.onSurfaceVariant,
-                                fontSize: 12,
-                              ),
-                            );
-                          }
-                          return const Text('');
-                        },
-                      ),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: const [
-                        FlSpot(0, 3),
-                        FlSpot(1, 4),
-                        FlSpot(2, 3.5),
-                        FlSpot(3, 5),
-                        FlSpot(4, 4),
-                        FlSpot(5, 4.5),
-                        FlSpot(6, 4.8),
-                      ],
-                      isCurved: true,
-                      color: colorScheme.primary,
-                      barWidth: 3,
-                      isStrokeCapRound: true,
-                      dotData: const FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: colorScheme.primary.withOpacity(0.1),
-                      ),
-                    ),
-                  ],
-                  lineTouchData: LineTouchData(
-                    touchTooltipData: LineTouchTooltipData(
-                      tooltipRoundedRadius: 8,
-                      getTooltipItems: (spots) {
-                        return spots.map((spot) {
-                          return LineTooltipItem(
-                            '${spot.y.toStringAsFixed(1)} habits',
-                            TextStyle(
-                              color: colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          );
-                        }).toList();
-                      },
-                    ),
-                  ),
+    return habitsAsync.when(
+      data: (habits) {
+        return completionsAsync.when(
+          data: (completions) {
+            if (habits.isEmpty) {
+              return Center(
+                child: Text(
+                  'Add habits to see statistics',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              );
+            }
+
+            // Get the past 7 days completions
+            final weeklyData = _generateWeeklyData(habits, completions);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _StatIndicator(
-                  color: Colors.green,
-                  label: 'Completed',
-                  value: '32',
+                Text(
+                  'Last 7 Days',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-                SizedBox(width: 24),
-                _StatIndicator(
-                  color: Colors.orange,
-                  label: 'In Progress',
-                  value: '12',
-                ),
-                SizedBox(width: 24),
-                _StatIndicator(
-                  color: Colors.red,
-                  label: 'Missed',
-                  value: '8',
+                const SizedBox(height: 16),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: weeklyData.map((day) {
+                          // Calculate bar height (80% of available height)
+                          final maxHeight = constraints.maxHeight * 0.8;
+                          final barHeight = maxHeight * day.completionRate;
+
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              // Completion percentage
+                              Text(
+                                '${(day.completionRate * 100).round()}%',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              // Bar
+                              Container(
+                                width: (constraints.maxWidth - 70) / 7,
+                                height: math.max(barHeight, 4),
+                                decoration: BoxDecoration(
+                                  color: day.isToday
+                                      ? colorScheme.primary
+                                      : colorScheme.primary.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              // Day label
+                              Text(
+                                day.label,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: day.isToday
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                  fontWeight: day.isToday
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 ),
               ],
-            ),
-          ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => Center(
+            child: Text('Error loading completions',
+                style: TextStyle(color: colorScheme.error)),
+          ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => Center(
+        child:
+            Text('Error loading habits', style: TextStyle(color: Colors.red)),
+      ),
     );
+  }
+
+  List<DayData> _generateWeeklyData(
+      List<Habit> habits, List<HabitCompletion> completions) {
+    final today = DateTime.now();
+    final result = <DayData>[];
+
+    // Generate data for the last 7 days
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayStart = DateTime(date.year, date.month, date.day);
+      final dayEnd = dayStart.add(const Duration(days: 1));
+
+      // Filter completions for this day
+      final dayCompletions = completions
+          .where((c) => c.date.isAfter(dayStart) && c.date.isBefore(dayEnd))
+          .toList();
+
+      // Calculate completion rate
+      double completionRate = 0;
+      if (habits.isNotEmpty) {
+        // Count distinct habits completed on this day
+        final completedHabitIds = dayCompletions
+            .map((c) => c.habitId)
+            .toSet(); // Use Set to get distinct habits
+        completionRate = completedHabitIds.length / habits.length;
+      }
+
+      // Format day label
+      String label;
+      if (i == 0) {
+        label = 'Today';
+      } else if (i == 1) {
+        label = 'Yday';
+      } else {
+        label = DateFormat('EEE').format(date); // e.g. "Mon"
+      }
+
+      result.add(DayData(
+        date: date,
+        label: label,
+        completionRate: completionRate,
+        isToday: i == 0,
+      ));
+    }
+
+    return result;
   }
 }
 
-class _StatIndicator extends StatelessWidget {
-  final Color color;
+class DayData {
+  final DateTime date;
   final String label;
-  final String value;
+  final double completionRate;
+  final bool isToday;
 
-  const _StatIndicator({
-    required this.color,
+  DayData({
+    required this.date,
     required this.label,
-    required this.value,
+    required this.completionRate,
+    required this.isToday,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-        ),
-      ],
-    );
-  }
 }

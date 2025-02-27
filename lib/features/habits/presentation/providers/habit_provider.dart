@@ -38,6 +38,28 @@ final dailyCompletionsProvider =
   return repository.getCompletionsForDate(date);
 });
 
+final allCompletionsProvider =
+    FutureProvider<List<HabitCompletion>>((ref) async {
+  final habitsAsync = ref.watch(habitsProvider);
+
+  final habits = habitsAsync.when(
+    data: (data) => data,
+    loading: () => <Habit>[],
+    error: (_, __) => <Habit>[],
+  );
+
+  final allCompletions = <HabitCompletion>[];
+
+  for (final habit in habits) {
+    final completions = await ref
+        .read(habitRepositoryProvider)
+        .getCompletionsForHabit(habit.id);
+    allCompletions.addAll(completions);
+  }
+
+  return allCompletions;
+});
+
 class HabitNotifier extends StateNotifier<AsyncValue<List<Habit>>> {
   final HabitRepository _repository;
 

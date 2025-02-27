@@ -6,6 +6,7 @@ import 'package:habit_tracker/features/auth/presentation/widgets/custom_text_fie
 import 'package:habit_tracker/features/auth/presentation/providers/auth_providers.dart';
 import 'package:habit_tracker/features/auth/presentation/state/auth_state.dart';
 import 'package:habit_tracker/features/auth/presentation/widgets/google_sign_in_button.dart';
+import 'package:habit_tracker/features/habits/presentation/pages/home_page.dart';
 
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
@@ -93,6 +94,13 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 ref.read(authStateProvider.notifier).signInWithGoogle();
               },
             ),
+          ),
+        );
+      } else if (next.status == AuthStatus.authenticated && context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
           ),
         );
       }

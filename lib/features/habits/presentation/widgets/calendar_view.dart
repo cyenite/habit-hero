@@ -4,7 +4,7 @@ import 'package:habit_tracker/features/habits/domain/models/habit.dart';
 import 'package:habit_tracker/features/habits/presentation/providers/habit_provider.dart';
 import 'package:intl/intl.dart';
 
-class CalendarView extends ConsumerWidget {
+class CalendarView extends ConsumerStatefulWidget {
   final List<HabitCompletion> completions;
   final String habitId;
 
@@ -15,9 +15,13 @@ class CalendarView extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Filter and sort completions
-    final sortedCompletions = [...completions]
+  ConsumerState<CalendarView> createState() => _CalendarViewState();
+}
+
+class _CalendarViewState extends ConsumerState<CalendarView> {
+  @override
+  Widget build(BuildContext context) {
+    final sortedCompletions = [...widget.completions]
       ..sort((a, b) => b.date.compareTo(a.date));
 
     // Group completions by month
@@ -161,13 +165,15 @@ class CalendarView extends ConsumerWidget {
               Navigator.of(context).pop();
               ref
                   .read(habitsProvider.notifier)
-                  .uncompleteHabit(habitId, completion.id)
+                  .uncompleteHabit(widget.habitId, completion.id)
                   .then((_) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Completion removed'),
-                  ),
-                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Completion removed'),
+                    ),
+                  );
+                }
               });
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),

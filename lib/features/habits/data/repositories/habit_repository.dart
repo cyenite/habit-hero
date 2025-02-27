@@ -3,19 +3,24 @@ import 'package:habit_tracker/features/habits/domain/models/habit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:habit_tracker/features/habits/data/repositories/local_storage_repository.dart';
 import 'package:habit_tracker/core/services/notification_service.dart';
+import 'package:uuid/uuid.dart';
 
 class HabitRepository {
   final SupabaseClient _supabase;
   final LocalStorageRepository _localStorage;
 
+  final bool _localOnly = false;
+
   HabitRepository(this._supabase, this._localStorage);
 
   Future<List<Habit>> getHabits() async {
     try {
-      // First, get habits from local storage
       final localHabits = await _localStorage.getHabits();
 
-      // Try to sync with remote if online
+      if (_localOnly) {
+        return localHabits;
+      }
+
       try {
         final response = await _supabase
             .from('habits')
@@ -25,19 +30,18 @@ class HabitRepository {
         final remoteHabits =
             response.map<Habit>((json) => Habit.fromJson(json)).toList();
 
-        // Update local storage with remote data
         for (final habit in remoteHabits) {
           await _localStorage.saveHabit(habit);
         }
 
-        return remoteHabits;
+        return await _localStorage.getHabits();
       } catch (e) {
+        // If remote sync fails, just use local data
         debugPrint('Error fetching remote habits: $e');
-        // Return local habits if remote fetch fails
         return localHabits;
       }
     } catch (e) {
-      debugPrint('Error fetching habits: $e');
+      debugPrint('Error in getHabits: $e');
       rethrow;
     }
   }
@@ -48,7 +52,6 @@ class HabitRepository {
 
   Future<Habit> createHabit(Habit habit) async {
     try {
-      // Save to local storage first
       await _localStorage.saveHabit(habit);
 
       // Schedule notification reminder
@@ -59,7 +62,10 @@ class HabitRepository {
         description: habit.description,
       );
 
-      // Try to save to remote
+      if (_localOnly) {
+        return habit;
+      }
+
       try {
         final response = await _supabase
             .from('habits')
@@ -71,7 +77,6 @@ class HabitRepository {
         return remoteHabit;
       } catch (e) {
         debugPrint('Error saving to remote: $e');
-        // Return local habit if remote save fails
         return habit;
       }
     } catch (e) {
@@ -82,10 +87,8 @@ class HabitRepository {
 
   Future<Habit> updateHabit(Habit habit) async {
     try {
-      // Save to local storage first
       await _localStorage.updateHabit(habit);
 
-      // Update notification reminder
       await NotificationService.cancelNotification(habit.id.hashCode);
       await NotificationService.scheduleHabitReminder(
         id: habit.id.hashCode,
@@ -94,7 +97,10 @@ class HabitRepository {
         description: habit.description,
       );
 
-      // Try to update remote
+      if (_localOnly) {
+        return habit;
+      }
+
       try {
         final response = await _supabase
             .from('habits')
@@ -107,7 +113,6 @@ class HabitRepository {
         return remoteHabit;
       } catch (e) {
         debugPrint('Error updating remote: $e');
-        // Return local habit if remote update fails
         return habit;
       }
     } catch (e) {
@@ -118,18 +123,18 @@ class HabitRepository {
 
   Future<void> deleteHabit(String id) async {
     try {
-      // Delete from local storage first
       await _localStorage.deleteHabit(id);
 
-      // Cancel notification reminder
       await NotificationService.cancelNotification(id.hashCode);
 
-      // Try to delete from remote
+      if (_localOnly) {
+        return;
+      }
+
       try {
         await _supabase.from('habits').delete().eq('id', id);
       } catch (e) {
         debugPrint('Error deleting from remote: $e');
-        // Continue execution even if remote delete fails
       }
     } catch (e) {
       debugPrint('Error deleting habit: $e');
@@ -139,54 +144,41 @@ class HabitRepository {
 
   Future<void> completeHabit(String habitId, {String? notes}) async {
     try {
-      final habit = await _localStorage.getHabitById(habitId);
+      final habit = await getHabitById(habitId);
+
       if (habit == null) {
         throw Exception('Habit not found');
       }
 
-      final now = DateTime.now();
       final completion = HabitCompletion(
-        date: now,
+        id: const Uuid().v4(),
+        date: DateTime.now(),
         habitId: habitId,
         completed: true,
         notes: notes,
       );
 
-      // Calculate new streak and level
+      await _localStorage.saveCompletion(completion);
+
       int newStreak = habit.streak + 1;
       int newTotalCompletions = habit.totalCompletions + 1;
       int newLongestStreak =
           habit.longestStreak < newStreak ? newStreak : habit.longestStreak;
 
-      // Calculate level (1 level for every 5 completions)
-      int newLevel = (newTotalCompletions / 5).ceil();
-
-      // XP points: 10 per completion + bonus for streaks
-      int streakBonus = newStreak >= 7
-          ? 20
-          : newStreak >= 3
-              ? 10
-              : 0;
-      int newXpPoints = habit.xpPoints + 10 + streakBonus;
-
-      // Update habit with new progress data
       final updatedHabit = habit.copyWith(
+        lastCompletedDate: DateTime.now(),
         streak: newStreak,
-        level: newLevel,
-        progress: 1.0, // Mark as complete for today
-        lastCompletedDate: now,
         longestStreak: newLongestStreak,
         totalCompletions: newTotalCompletions,
-        xpPoints: newXpPoints,
+        progress: (newTotalCompletions / 30).clamp(0.0, 1.0),
       );
 
-      // Save completion record
-      await _localStorage.saveCompletion(completion);
+      await _localStorage.saveHabit(updatedHabit);
 
-      // Update habit with new stats
-      await _localStorage.updateHabit(updatedHabit);
+      if (_localOnly) {
+        return;
+      }
 
-      // Try to sync with remote
       try {
         await _supabase.from('habit_completions').insert(completion.toJson());
         await _supabase
@@ -195,7 +187,6 @@ class HabitRepository {
             .eq('id', habitId);
       } catch (e) {
         debugPrint('Error syncing completion with remote: $e');
-        // Continue execution even if remote sync fails
       }
     } catch (e) {
       debugPrint('Error completing habit: $e');
@@ -210,16 +201,13 @@ class HabitRepository {
         throw Exception('Habit not found');
       }
 
-      // Delete the completion
       await _localStorage.deleteCompletion(completionId);
 
-      // Recalculate streak and stats
       final completions = await _localStorage.getCompletionsForHabit(habitId);
       completions.sort((a, b) => b.date.compareTo(a.date));
 
       int newStreak = 0;
       if (completions.isNotEmpty) {
-        // Count consecutive completions up to today
         final today = DateTime.now();
         final todayDate = DateTime(today.year, today.month, today.day);
 
@@ -238,17 +226,18 @@ class HabitRepository {
         }
       }
 
-      // Update habit with recalculated stats
       final updatedHabit = habit.copyWith(
         streak: newStreak,
         progress: completions.isEmpty ? 0.0 : 1.0,
         totalCompletions: habit.totalCompletions - 1,
-        // Keep longest streak, just update current streak
       );
 
       await _localStorage.updateHabit(updatedHabit);
 
-      // Try to sync with remote
+      if (_localOnly) {
+        return;
+      }
+
       try {
         await _supabase
             .from('habit_completions')
@@ -260,7 +249,6 @@ class HabitRepository {
             .eq('id', habitId);
       } catch (e) {
         debugPrint('Error syncing uncompletion with remote: $e');
-        // Continue execution even if remote sync fails
       }
     } catch (e) {
       debugPrint('Error uncompleting habit: $e');
