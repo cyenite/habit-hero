@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:habit_tracker/features/habits/domain/validators/habit_validator.dart';
+import 'package:uuid/uuid.dart';
 
 part 'habit.g.dart';
 
@@ -15,6 +16,52 @@ enum HabitFrequency {
   weekly,
   @HiveField(2)
   monthly,
+}
+
+@HiveType(typeId: 3)
+class HabitCompletion {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final DateTime date;
+
+  @HiveField(2)
+  final String habitId;
+
+  @HiveField(3)
+  final bool completed;
+
+  @HiveField(4)
+  final String? notes;
+
+  HabitCompletion({
+    String? id,
+    required this.date,
+    required this.habitId,
+    required this.completed,
+    this.notes,
+  }) : id = id ?? const Uuid().v4();
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'date': date.toIso8601String(),
+      'habit_id': habitId,
+      'completed': completed,
+      'notes': notes,
+    };
+  }
+
+  factory HabitCompletion.fromJson(Map<String, dynamic> json) {
+    return HabitCompletion(
+      id: json['id'],
+      date: DateTime.parse(json['date']),
+      habitId: json['habit_id'],
+      completed: json['completed'],
+      notes: json['notes'],
+    );
+  }
 }
 
 @HiveType(typeId: 1)
@@ -55,24 +102,42 @@ class Habit {
   @HiveField(11)
   final String colorValue;
 
+  @HiveField(12)
+  final DateTime? lastCompletedDate;
+
+  @HiveField(13)
+  final int longestStreak;
+
+  @HiveField(14)
+  final int totalCompletions;
+
+  @HiveField(15)
+  final int xpPoints;
+
   IconData get icon => IconData(iconData, fontFamily: 'MaterialIcons');
   Color get color => Color(int.parse(colorValue));
 
   Habit({
-    required this.id,
+    String? id,
     required this.name,
     this.description,
     required this.frequency,
     required this.selectedDays,
     required this.reminderTime,
-    required this.createdAt,
+    DateTime? createdAt,
     this.streak = 0,
     this.level = 1,
     this.progress = 0.0,
     IconData icon = Icons.star,
     required Color color,
-  })  : iconData = icon.codePoint,
-        colorValue = color.value.toString() {
+    this.lastCompletedDate,
+    this.longestStreak = 0,
+    this.totalCompletions = 0,
+    this.xpPoints = 0,
+  })  : id = id ?? const Uuid().v4(),
+        iconData = icon.codePoint,
+        colorValue = color.value.toString(),
+        createdAt = createdAt ?? DateTime.now() {
     // Validate the habit data
     HabitValidator.validate(
       name: name,
@@ -96,6 +161,10 @@ class Habit {
     double? progress,
     IconData? icon,
     Color? color,
+    DateTime? lastCompletedDate,
+    int? longestStreak,
+    int? totalCompletions,
+    int? xpPoints,
   }) {
     return Habit(
       id: id ?? this.id,
@@ -110,6 +179,10 @@ class Habit {
       progress: progress ?? this.progress,
       icon: icon ?? this.icon,
       color: color ?? this.color,
+      lastCompletedDate: lastCompletedDate ?? this.lastCompletedDate,
+      longestStreak: longestStreak ?? this.longestStreak,
+      totalCompletions: totalCompletions ?? this.totalCompletions,
+      xpPoints: xpPoints ?? this.xpPoints,
     );
   }
 
@@ -118,48 +191,48 @@ class Habit {
       'id': id,
       'name': name,
       'description': description,
-      'frequency': frequency.index,
+      'frequency': frequency.toString().split('.').last,
       'selected_days': selectedDays,
-      'reminder_time': {
-        'hour': reminderTime.hour,
-        'minute': reminderTime.minute,
-      },
+      'reminder_time': '${reminderTime.hour}:${reminderTime.minute}',
       'created_at': createdAt.toIso8601String(),
       'streak': streak,
       'level': level,
       'progress': progress,
       'icon_data': iconData,
       'color_value': colorValue,
-      'user_id': supabase.auth.currentUser?.id,
+      'last_completed_date': lastCompletedDate?.toIso8601String(),
+      'longest_streak': longestStreak,
+      'total_completions': totalCompletions,
+      'xp_points': xpPoints,
     };
   }
 
   factory Habit.fromJson(Map<String, dynamic> json) {
-    final colorValue = json['color_value'];
-    final color = colorValue is String
-        ? Color(int.parse(colorValue))
-        : Color(colorValue as int);
-
-    final progress = json['progress'];
-    final progressValue =
-        progress is int ? progress.toDouble() : progress as double;
+    final reminderTimeParts = (json['reminder_time'] as String).split(':');
+    final hour = int.parse(reminderTimeParts[0]);
+    final minute = int.parse(reminderTimeParts[1]);
 
     return Habit(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String?,
-      frequency: HabitFrequency.values[json['frequency'] as int],
-      selectedDays: (json['selected_days'] as List).cast<bool>(),
-      reminderTime: TimeOfDay(
-        hour: (json['reminder_time'] as Map)['hour'] as int,
-        minute: (json['reminder_time'] as Map)['minute'] as int,
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      frequency: HabitFrequency.values.firstWhere(
+        (e) => e.toString().split('.').last == json['frequency'],
       ),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      streak: json['streak'] as int,
-      level: json['level'] as int,
-      progress: progressValue,
-      icon: IconData(json['icon_data'] as int, fontFamily: 'MaterialIcons'),
-      color: color,
+      selectedDays: (json['selected_days'] as List).cast<bool>(),
+      reminderTime: TimeOfDay(hour: hour, minute: minute),
+      createdAt: DateTime.parse(json['created_at']),
+      streak: json['streak'] ?? 0,
+      level: json['level'] ?? 1,
+      progress: json['progress'] ?? 0.0,
+      icon: IconData(json['icon_data'], fontFamily: 'MaterialIcons'),
+      color: Color(int.parse(json['color_value'])),
+      lastCompletedDate: json['last_completed_date'] != null
+          ? DateTime.parse(json['last_completed_date'])
+          : null,
+      longestStreak: json['longest_streak'] ?? 0,
+      totalCompletions: json['total_completions'] ?? 0,
+      xpPoints: json['xp_points'] ?? 0,
     );
   }
 

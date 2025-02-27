@@ -28,6 +28,7 @@ class HabitTrackerApp extends ConsumerWidget {
           primary: const Color(0xFF34C759),
           secondary: const Color(0xFF5856D6),
           tertiary: const Color(0xFF007AFF),
+          surface: const Color(0xFFFFFFFF),
         ).copyWith(
           shadow: const Color(0xFF8E8E93).withOpacity(0.15),
         ),
@@ -46,6 +47,7 @@ class HabitTrackerApp extends ConsumerWidget {
           primary: const Color(0xFF30D158),
           secondary: const Color(0xFF5E5CE6),
           tertiary: const Color(0xFF0A84FF),
+          surface: const Color(0xFF1C1C1E),
         ).copyWith(
           shadow: const Color(0xFF000000).withOpacity(0.2),
         ),

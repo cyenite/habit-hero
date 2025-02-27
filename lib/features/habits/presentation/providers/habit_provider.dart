@@ -20,6 +20,24 @@ final habitsProvider =
   (ref) => HabitNotifier(ref.watch(habitRepositoryProvider)),
 );
 
+final habitByIdProvider =
+    FutureProvider.family<Habit?, String>((ref, id) async {
+  final repository = ref.watch(habitRepositoryProvider);
+  return repository.getHabitById(id);
+});
+
+final habitCompletionsProvider =
+    FutureProvider.family<List<HabitCompletion>, String>((ref, habitId) async {
+  final repository = ref.watch(habitRepositoryProvider);
+  return repository.getCompletionsForHabit(habitId);
+});
+
+final dailyCompletionsProvider =
+    FutureProvider.family<List<HabitCompletion>, DateTime>((ref, date) async {
+  final repository = ref.watch(habitRepositoryProvider);
+  return repository.getCompletionsForDate(date);
+});
+
 class HabitNotifier extends StateNotifier<AsyncValue<List<Habit>>> {
   final HabitRepository _repository;
 
@@ -32,43 +50,53 @@ class HabitNotifier extends StateNotifier<AsyncValue<List<Habit>>> {
       state = const AsyncValue.loading();
       final habits = await _repository.getHabits();
       state = AsyncValue.data(habits);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
     }
   }
 
-  Future<void> createHabit(Habit habit) async {
+  Future<void> addHabit(Habit habit) async {
     try {
-      final newHabit = await _repository.createHabit(habit);
-      state.whenData((habits) {
-        state = AsyncValue.data([newHabit, ...habits]);
-      });
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      await _repository.createHabit(habit);
+      await loadHabits();
+    } catch (e) {
+      rethrow;
     }
   }
 
   Future<void> updateHabit(Habit habit) async {
     try {
-      final updatedHabit = await _repository.updateHabit(habit);
-      state.whenData((habits) {
-        state = AsyncValue.data(
-          habits.map((h) => h.id == habit.id ? updatedHabit : h).toList(),
-        );
-      });
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      await _repository.updateHabit(habit);
+      await loadHabits();
+    } catch (e) {
+      rethrow;
     }
   }
 
   Future<void> deleteHabit(String id) async {
     try {
       await _repository.deleteHabit(id);
-      state.whenData((habits) {
-        state = AsyncValue.data(habits.where((h) => h.id != id).toList());
-      });
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      await loadHabits();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> completeHabit(String habitId, {String? notes}) async {
+    try {
+      await _repository.completeHabit(habitId, notes: notes);
+      await loadHabits();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> uncompleteHabit(String habitId, String completionId) async {
+    try {
+      await _repository.uncompleteHabit(habitId, completionId);
+      await loadHabits();
+    } catch (e) {
+      rethrow;
     }
   }
 }

@@ -4,7 +4,7 @@ import 'package:habit_tracker/features/habits/presentation/widgets/activity_grid
 import 'package:habit_tracker/features/habits/presentation/widgets/stats_chart.dart';
 import 'package:habit_tracker/features/habits/presentation/pages/habits_page.dart';
 import 'package:habit_tracker/features/habits/presentation/providers/habit_provider.dart';
-import 'package:habit_tracker/features/theme/providers/theme_provider.dart';
+import 'package:habit_tracker/core/providers/theme_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -19,6 +19,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    var isDarkMode = ref.watch(themeProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -53,9 +54,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                 actions: [
                   IconButton.filledTonal(
                     onPressed: () {
-                      // TODO: Implement notifications
+                      ref.read(themeProvider.notifier).toggleTheme();
                     },
-                    icon: const Icon(Icons.notifications_outlined, size: 20),
+                    icon: isDarkMode
+                        ? const Icon(Icons.light_mode, size: 20)
+                        : const Icon(Icons.dark_mode, size: 20),
                   ),
                   const SizedBox(width: 16),
                 ],
@@ -627,7 +630,7 @@ class _ThemeDialog extends ConsumerWidget {
         for (final theme in ThemeMode.values)
           SimpleDialogOption(
             onPressed: () {
-              ref.read(themeProvider.notifier).setTheme(theme);
+              ref.read(themeProvider.notifier).toggleTheme();
               Navigator.pop(context);
             },
             child: Text(theme.name.toUpperCase()),

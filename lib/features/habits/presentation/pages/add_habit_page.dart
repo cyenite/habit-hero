@@ -83,7 +83,7 @@ class _AddHabitPageState extends ConsumerState<AddHabitPage> {
         color: _selectedColor,
       );
 
-      await ref.read(habitsProvider.notifier).createHabit(habit);
+      await ref.read(habitsProvider.notifier).addHabit(habit);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
