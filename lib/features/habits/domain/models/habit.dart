@@ -190,7 +190,7 @@ class Habit {
       'id': id,
       'name': name,
       'description': description,
-      'frequency': frequency.toString().split('.').last,
+      'frequency': frequency.index,
       'selected_days': selectedDays,
       'reminder_time': '${reminderTime.hour}:${reminderTime.minute}',
       'created_at': createdAt.toIso8601String(),
@@ -215,9 +215,9 @@ class Habit {
       id: json['id'],
       name: json['name'],
       description: json['description'],
-      frequency: HabitFrequency.values.firstWhere(
-        (e) => e.toString().split('.').last == json['frequency'],
-      ),
+      frequency: json['frequency'] is int
+          ? HabitFrequency.values[json['frequency']]
+          : HabitFrequency.daily,
       selectedDays: (json['selected_days'] as List).cast<bool>(),
       reminderTime: TimeOfDay(hour: hour, minute: minute),
       createdAt: DateTime.parse(json['created_at']),

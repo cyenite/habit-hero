@@ -55,12 +55,12 @@ class LocalStorageRepository {
 
   Future<void> saveHabit(Habit habit) async {
     await _habitsBox.put(habit.id, habit);
-    await _addToSyncQueue('create', habit);
+    await addToSyncQueue('create', habit);
   }
 
   Future<void> updateHabit(Habit habit) async {
     await _habitsBox.put(habit.id, habit);
-    await _addToSyncQueue('update', habit);
+    await addToSyncQueue('update', habit);
   }
 
   Future<void> deleteHabit(String id) async {
@@ -70,7 +70,7 @@ class LocalStorageRepository {
     }
 
     await _habitsBox.delete(id);
-    await _addToSyncQueue('delete', {'id': id});
+    await addToSyncQueue('delete', {'id': id});
   }
 
   Future<List<HabitCompletion>> getAllCompletions() async {
@@ -96,15 +96,15 @@ class LocalStorageRepository {
 
   Future<void> saveCompletion(HabitCompletion completion) async {
     await _completionsBox.put(completion.id, completion);
-    await _addToSyncQueue('completion', completion);
+    await addToSyncQueue('completion', completion);
   }
 
   Future<void> deleteCompletion(String id) async {
     await _completionsBox.delete(id);
-    await _addToSyncQueue('delete_completion', {'id': id});
+    await addToSyncQueue('delete_completion', {'id': id});
   }
 
-  Future<void> _addToSyncQueue(String operation, dynamic data) async {
+  Future<void> addToSyncQueue(String operation, dynamic data) async {
     await _syncQueueBox.add({
       'operation': operation,
       'data': data is Habit || data is HabitCompletion ? data.toJson() : data,
@@ -129,5 +129,22 @@ class LocalStorageRepository {
   Future<void> save<T>(String boxName, String id, T item) async {
     final box = await Hive.openBox(boxName);
     await box.put(id, item);
+  }
+
+  // Save habit without adding to sync queue (for syncing from remote)
+  Future<void> updateHabitWithoutSync(Habit habit) async {
+    await _habitsBox.put(habit.id, habit);
+  }
+
+  // Save completion without adding to sync queue (for syncing from remote)
+  Future<void> saveCompletionWithoutSync(HabitCompletion completion) async {
+    await _completionsBox.put(completion.id, completion);
+  }
+
+  // Get all sync operations by type
+  Future<List<Map>> getSyncOperationsByType(String operationType) async {
+    return _syncQueueBox.values
+        .where((operation) => operation['operation'] == operationType)
+        .toList();
   }
 }

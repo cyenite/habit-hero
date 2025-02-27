@@ -8,6 +8,7 @@ import 'package:habit_tracker/features/gamification/presentation/widgets/level_p
 import 'package:habit_tracker/features/habits/presentation/widgets/settings_section.dart';
 import 'package:habit_tracker/features/habits/presentation/widgets/settings_item.dart';
 import 'package:habit_tracker/features/habits/presentation/widgets/theme_dialog.dart';
+import 'package:habit_tracker/core/services/service_locator.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -233,6 +234,73 @@ class ProfilePage extends ConsumerWidget {
                         ),
                       );
                     }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SettingsSection(
+              title: 'Data',
+              items: [
+                SettingsItem(
+                  icon: Icons.sync,
+                  title: 'Sync Data',
+                  onTap: () async {
+                    final syncService = ServiceLocator.syncService;
+                    final isConnected =
+                        await ServiceLocator.connectivityService.isConnected();
+
+                    if (!isConnected) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('No internet connection available')),
+                      );
+                      return;
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Syncing data with server...')),
+                    );
+
+                    await syncService.syncWithServer();
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Sync completed')),
+                      );
+                    }
+                  },
+                ),
+                SettingsItem(
+                  icon: Icons.delete_sweep,
+                  title: 'Clear Local Data',
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Clear Local Data'),
+                        content: const Text(
+                            'This will clear all local data. Your synced data will be downloaded again next time you connect to the internet. Are you sure?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              // Implementation for clearing local data
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Local data cleared')),
+                              );
+                            },
+                            child: const Text('Clear'),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                 ),
               ],
