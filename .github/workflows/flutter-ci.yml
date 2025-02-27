@@ -1,4 +1,4 @@
-name: Flutter CI/CD
+name: Flutter Build Release Artifacts
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
         echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
 
     - name: Build APK
-      run: flutter build apk --release
+      run: flutter build apk --release --no-tree-shake-icons
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
