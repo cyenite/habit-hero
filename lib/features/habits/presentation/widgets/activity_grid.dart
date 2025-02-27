@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habit_tracker/features/habits/domain/models/habit.dart';
+import 'package:habit_tracker/features/habits/presentation/pages/add_habit_page.dart';
 import 'package:habit_tracker/features/habits/presentation/providers/habit_provider.dart';
 import 'package:habit_tracker/features/habits/presentation/widgets/activity_card.dart';
 
@@ -98,13 +99,23 @@ class ActivityGrid extends ConsumerWidget {
             // Ensure we have at least 4 cards for a balanced grid
             while (cards.length < 4) {
               cards.add(
-                ActivityCard(
-                  title: 'New Habit',
-                  value: 'Add',
-                  unit: 'new habits',
-                  icon: Icons.add_circle_outline,
-                  color: Colors.grey,
-                  progress: 0.0,
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddHabitPage(),
+                      ),
+                    );
+                  },
+                  child: const ActivityCard(
+                    title: 'New Habit',
+                    value: 'Add',
+                    unit: 'new habits',
+                    icon: Icons.add_circle_outline,
+                    color: Colors.grey,
+                    progress: 0.0,
+                  ),
                 ),
               );
             }

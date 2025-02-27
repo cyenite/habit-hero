@@ -1,7 +1,10 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:habit_tracker/features/habits/domain/models/habit.dart';
 import 'package:habit_tracker/features/habits/data/adapters/adapters.dart';
-import 'package:habit_tracker/features/habits/data/adapters/habit_completion_adapter.dart';
+import 'package:habit_tracker/features/habits/data/adapters/habit_completion_adapter.dart'
+    as completion_adapter;
+import 'package:habit_tracker/features/gamification/data/adapters/achievement_adapter.dart';
+import 'package:habit_tracker/features/gamification/data/adapters/challenge_adapter.dart';
 
 class LocalStorageRepository {
   static LocalStorageRepository? _instance;
@@ -31,7 +34,11 @@ class LocalStorageRepository {
     Hive.registerAdapter(HabitAdapter());
     Hive.registerAdapter(HabitFrequencyAdapter());
     Hive.registerAdapter(TimeOfDayAdapter());
-    Hive.registerAdapter(HabitCompletionAdapter());
+    Hive.registerAdapter(completion_adapter.HabitCompletionAdapter());
+
+    // Register new adapters
+    Hive.registerAdapter(AchievementAdapter());
+    Hive.registerAdapter(ChallengeAdapter());
 
     _habitsBox = await Hive.openBox<Habit>(_habitsBoxName);
     _completionsBox = await Hive.openBox<HabitCompletion>(_completionsBoxName);
@@ -115,5 +122,16 @@ class LocalStorageRepository {
 
   Future<void> clearSyncQueue() async {
     await _syncQueueBox.clear();
+  }
+
+  Future<List<T>> getAll<T>(String boxName) async {
+    final box = await Hive.openBox(boxName);
+    final values = box.values.toList();
+    return values.cast<T>();
+  }
+
+  Future<void> save<T>(String boxName, String id, T item) async {
+    final box = await Hive.openBox(boxName);
+    await box.put(id, item);
   }
 }

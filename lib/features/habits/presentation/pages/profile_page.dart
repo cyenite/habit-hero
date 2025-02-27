@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habit_tracker/core/providers/theme_provider.dart';
 import 'package:habit_tracker/features/auth/presentation/pages/auth_page.dart';
 import 'package:habit_tracker/features/auth/presentation/providers/auth_providers.dart';
-import 'package:habit_tracker/features/habits/domain/models/habit.dart';
-import 'package:habit_tracker/features/habits/presentation/providers/habit_provider.dart';
+import 'package:habit_tracker/features/gamification/presentation/widgets/gamification_stats.dart';
+import 'package:habit_tracker/features/gamification/presentation/widgets/level_progress.dart';
 import 'package:habit_tracker/features/habits/presentation/widgets/settings_section.dart';
 import 'package:habit_tracker/features/habits/presentation/widgets/settings_item.dart';
 import 'package:habit_tracker/features/habits/presentation/widgets/theme_dialog.dart';
@@ -16,9 +16,6 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final userAsync = ref.watch(userMetadataProvider);
-    final habitsAsync = ref.watch(habitsProvider);
-    final completionsAsync = ref.watch(allCompletionsProvider);
-
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(
@@ -48,16 +45,12 @@ class ProfilePage extends ConsumerWidget {
           sliver: SliverToBoxAdapter(
             child: Column(
               children: [
-                // Profile Info
                 _buildProfileCard(context, colorScheme, userAsync),
                 const SizedBox(height: 24),
-
-                // Stats Summary
-                _buildStatsSummary(
-                    context, colorScheme, habitsAsync, completionsAsync),
+                const LevelProgress(),
                 const SizedBox(height: 24),
-
-                // Settings Sections
+                const GamificationStats(),
+                const SizedBox(height: 24),
                 _buildSettingsSections(context),
               ],
             ),
@@ -143,118 +136,6 @@ class ProfilePage extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStatsSummary(
-    BuildContext context,
-    ColorScheme colorScheme,
-    AsyncValue<List<Habit>> habitsAsync,
-    AsyncValue<List<HabitCompletion>> completionsAsync,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Your Progress',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          habitsAsync.when(
-            data: (habits) {
-              return completionsAsync.when(
-                data: (completions) {
-                  final totalHabits = habits.length;
-                  final totalCompletions = completions.length;
-
-                  // Calculate streak
-                  int currentStreak = 0;
-                  if (habits.isNotEmpty) {
-                    currentStreak = habits
-                        .map((habit) => habit.streak)
-                        .reduce((a, b) => a > b ? a : b);
-                  }
-
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatItem(
-                        context,
-                        '$totalHabits',
-                        'Total Habits',
-                        Icons.list_alt,
-                      ),
-                      _buildStatItem(
-                        context,
-                        '$totalCompletions',
-                        'Completions',
-                        Icons.check_circle_outline,
-                      ),
-                      _buildStatItem(
-                        context,
-                        '$currentStreak',
-                        'Current Streak',
-                        Icons.local_fire_department,
-                      ),
-                    ],
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => const Text('Error loading stats'),
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const Text('Error loading habits'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(
-    BuildContext context,
-    String value,
-    String label,
-    IconData icon,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer.withOpacity(0.3),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: colorScheme.primary,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-        ),
-      ],
     );
   }
 
