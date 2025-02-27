@@ -7,11 +7,11 @@ class AchievementBadge extends StatelessWidget {
   final bool showDetails;
 
   const AchievementBadge({
-    Key? key,
+    super.key,
     required this.achievement,
     this.onTap,
     this.showDetails = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class AchievementBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: achievement.unlocked
               ? achievement.color.withOpacity(0.2)
-              : colorScheme.surfaceVariant.withOpacity(0.3),
+              : colorScheme.surfaceContainerHighest.withOpacity(0.3),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: achievement.unlocked
@@ -42,7 +42,7 @@ class AchievementBadge extends StatelessWidget {
               decoration: BoxDecoration(
                 color: achievement.unlocked
                     ? achievement.color.withOpacity(0.2)
-                    : colorScheme.surfaceVariant.withOpacity(0.5),
+                    : colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -114,7 +114,7 @@ class AchievementBadge extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

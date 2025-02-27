@@ -16,7 +16,7 @@ class UpcomingRemindersList extends ConsumerWidget {
           return Container(
             height: 100,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.3),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Center(
@@ -27,7 +27,7 @@ class UpcomingRemindersList extends ConsumerWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceVariant.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
             borderRadius: BorderRadius.circular(16),
           ),
           child: ListView.builder(

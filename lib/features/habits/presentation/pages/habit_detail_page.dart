@@ -87,6 +87,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
                 builder: (context) => EditHabitPage(habit: habit),
               ),
             ).then((_) {
+              // ignore: no_wildcard_variable_uses
               _ = ref.refresh(habitByIdProvider(widget.habitId));
             });
             break;
@@ -448,6 +449,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> {
                         backgroundColor: Colors.green,
                       ),
                     );
+                    // ignore: no_wildcard_variable_uses
                     _ = ref.refresh(habitByIdProvider(widget.habitId));
                   }
                 });

@@ -66,8 +66,9 @@ class ConnectivityService {
   }
 
   Future<bool> isConnected() async {
-    if (kIsWeb || !_hasInitialized)
+    if (kIsWeb || !_hasInitialized) {
       return true; // Assume connected on web or if not initialized
+    }
 
     try {
       final result = await _connectivity.checkConnectivity();

@@ -5,7 +5,7 @@ import 'package:habit_tracker/features/gamification/presentation/pages/achieveme
 import 'package:habit_tracker/features/gamification/presentation/pages/challenges_page.dart';
 
 class GamificationStats extends ConsumerWidget {
-  const GamificationStats({Key? key}) : super(key: key);
+  const GamificationStats({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

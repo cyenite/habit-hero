@@ -5,7 +5,7 @@ import 'package:habit_tracker/features/gamification/presentation/providers/gamif
 import 'package:habit_tracker/features/gamification/presentation/widgets/achievement_badge.dart';
 
 class AchievementsPage extends ConsumerWidget {
-  const AchievementsPage({Key? key}) : super(key: key);
+  const AchievementsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -116,7 +116,7 @@ class AchievementsPage extends ConsumerWidget {
                 minHeight: 10,
                 backgroundColor: Theme.of(context)
                     .colorScheme
-                    .surfaceVariant
+                    .surfaceContainerHighest
                     .withOpacity(0.5),
                 valueColor: AlwaysStoppedAnimation<Color>(
                     Theme.of(context).colorScheme.primary),

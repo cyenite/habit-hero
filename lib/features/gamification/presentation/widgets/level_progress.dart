@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:habit_tracker/features/gamification/presentation/providers/gamification_providers.dart';
 
 class LevelProgress extends ConsumerWidget {
-  const LevelProgress({Key? key}) : super(key: key);
+  const LevelProgress({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,7 +86,8 @@ class LevelProgress extends ConsumerWidget {
                 child: LinearProgressIndicator(
                   value: progress,
                   minHeight: 8,
-                  backgroundColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                  backgroundColor:
+                      colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   valueColor:
                       AlwaysStoppedAnimation<Color>(colorScheme.primary),
                 ),

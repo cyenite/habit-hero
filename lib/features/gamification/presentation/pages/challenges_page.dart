@@ -4,7 +4,7 @@ import 'package:habit_tracker/features/gamification/presentation/providers/gamif
 import 'package:habit_tracker/features/gamification/presentation/widgets/challenge_card.dart';
 
 class ChallengesPage extends ConsumerWidget {
-  const ChallengesPage({Key? key}) : super(key: key);
+  const ChallengesPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -6,10 +6,10 @@ class ChallengeCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const ChallengeCard({
-    Key? key,
+    super.key,
     required this.challenge,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +79,7 @@ class ChallengeCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: challenge.completed
                         ? Colors.green.withOpacity(0.2)
-                        : colorScheme.surfaceVariant.withOpacity(0.5),
+                        : colorScheme.surfaceContainerHighest.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

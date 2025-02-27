@@ -147,8 +147,8 @@ class HabitsPage extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color:
-                                    colorScheme.surfaceVariant.withOpacity(0.3),
+                                color: colorScheme.surfaceContainerHighest
+                                    .withOpacity(0.3),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(

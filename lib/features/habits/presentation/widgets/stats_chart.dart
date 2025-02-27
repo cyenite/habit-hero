@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'dart:math' as math;
 
 class StatsChart extends ConsumerWidget {
-  const StatsChart({Key? key}) : super(key: key);
+  const StatsChart({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -107,9 +107,13 @@ class StatsChart extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => Center(
-        child:
-            Text('Error loading habits', style: TextStyle(color: Colors.red)),
+      error: (_, __) => const Center(
+        child: Text(
+          'Error loading habits',
+          style: TextStyle(
+            color: Colors.red,
+          ),
+        ),
       ),
     );
   }
