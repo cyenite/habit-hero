@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "474994024182",
+    "project_id": "habit-hro",
+    "storage_bucket": "habit-hro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474994024182:android:272cea2e3179e8b23196d7",
+        "android_client_info": {
+          "package_name": "com.cyenite.habit_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "474994024182-b93fjlrfp8eh34j6b6tgq94kqu004k6l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cyenite.habit_tracker",
+            "certificate_hash": "53b3dea873be04a8e1a9e792df9b8239b18f5bde"
+          }
+        },
+        {
+          "client_id": "474994024182-gv7242p2k9sg87fn57cgfte3u8envgfl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtMvLBFSL8vYZMFEmOYjB3Cxk0MQu-3Ps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "474994024182-gv7242p2k9sg87fn57cgfte3u8envgfl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

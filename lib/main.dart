@@ -6,6 +6,7 @@ import 'package:habit_tracker/app/app.dart';
 import 'package:habit_tracker/core/services/service_locator.dart';
 import 'package:habit_tracker/core/services/notification_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   await runZonedGuarded(() async {
@@ -14,6 +15,7 @@ void main() async {
     await Hive.initFlutter();
     await ServiceLocator.initialize();
     await NotificationService.initialize();
+    await Firebase.initializeApp();
 
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.presentError(details);

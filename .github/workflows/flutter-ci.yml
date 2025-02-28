@@ -45,7 +45,18 @@ jobs:
         mkdir -p web/assets
         echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > web/assets/env
         echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> web/assets/env
+
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
     
+    - name: Create key.properties
+      run: |
+        echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+        echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+        echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+        echo "storeFile=../app/upload-keystore.jks" >> android/key.properties
+        
     - name: Build APK
       run: flutter build apk --release --no-tree-shake-icons
     
