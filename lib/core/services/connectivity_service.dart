@@ -10,10 +10,8 @@ class ConnectivityService {
 
   ConnectivityService() {
     _connectionStatusController = StreamController<bool>.broadcast();
-    // Always provide a default value
     _connectionStatusController.add(true);
 
-    // Try to initialize, but don't block on it
     _safeInitialize();
   }
 
@@ -21,9 +19,8 @@ class ConnectivityService {
 
   Future<void> _safeInitialize() async {
     try {
-      if (kIsWeb) return; // Skip on web platforms
+      if (kIsWeb) return; // Skip on web platform
 
-      // Listen for changes safely
       try {
         _connectivitySubscription =
             _connectivity.onConnectivityChanged.listen((result) {
@@ -37,7 +34,6 @@ class ConnectivityService {
         debugPrint('Could not listen to connectivity changes: $e');
       }
 
-      // Check initial state safely
       await _safeCheckConnectivity();
       _hasInitialized = true;
     } catch (e) {
@@ -67,7 +63,7 @@ class ConnectivityService {
 
   Future<bool> isConnected() async {
     if (kIsWeb || !_hasInitialized) {
-      return true; // Assume connected on web or if not initialized
+      return true;
     }
 
     try {
@@ -75,7 +71,7 @@ class ConnectivityService {
       return result != ConnectivityResult.none;
     } catch (e) {
       debugPrint('Error checking connectivity: $e');
-      return true; // Assume connected on error
+      return true;
     }
   }
 }

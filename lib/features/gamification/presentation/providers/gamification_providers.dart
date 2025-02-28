@@ -19,16 +19,15 @@ final dailyChallengesProvider = FutureProvider<List<Challenge>>((ref) async {
   return repository.getDailyChallenges();
 });
 
-// User's current level based on total XP across all habits
 final userLevelProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final habitsAsync = ref.watch(habitsProvider);
 
-  // Handle AsyncValue directly
   final habits = habitsAsync.value ?? [];
 
   int totalXp = 0;
   for (final habit in habits) {
-    totalXp += habit.xpPoints.toInt(); // Convert double to int if needed
+    totalXp += habit.xpPoints
+        .toInt(); // FIXME(Ron): Check why other types are not [int] after local storage sync
   }
 
   int level = (totalXp / 100).floor() + 1;

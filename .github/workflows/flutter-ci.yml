@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for proper versioning
     - name: Setup JDK
       uses: actions/setup-java@v1
       with:
@@ -33,11 +35,15 @@ jobs:
       run: |
         echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env
         echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
-
+        # Also create .env in assets directory for web build
+        mkdir -p web/assets
+        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > web/assets/env
+        echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> web/assets/env
+    
     - name: Build APK
       run: flutter build apk --release --no-tree-shake-icons
     
-    - name: Upload APK
+    - name: Upload APK as workflow artifact
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
@@ -48,8 +54,29 @@ jobs:
         flutter config --enable-web
         flutter build web --release --no-tree-shake-icons
     
-    - name: Upload Web Build
+    - name: Upload Web Build as workflow artifact
       uses: actions/upload-artifact@v4
       with:
         name: web-build
-        path: build/web/ 
+        path: build/web/
+        
+    - name: Get app version
+      id: app_version
+      run: |
+        VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "release_name=Release v$VERSION" >> $GITHUB_ENV
+        echo "tag_name=v$VERSION" >> $GITHUB_ENV
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: github.ref == 'refs/heads/main'
+      with:
+        tag_name: ${{ env.tag_name }}
+        name: ${{ env.release_name }}
+        draft: false
+        prerelease: false
+        files: |
+          build/app/outputs/flutter-apk/app-release.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

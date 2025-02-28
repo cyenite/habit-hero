@@ -49,12 +49,8 @@ class AchievementsPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Stats summary
                       _buildAchievementStats(achievements),
                       const SizedBox(height: 32),
-
-                      // Achievement categories
                       ..._buildAchievementCategories(
                           sortedAchievements, context),
                     ],
@@ -149,7 +145,6 @@ class AchievementsPage extends ConsumerWidget {
       groupedAchievements[achievement.type]!.add(achievement);
     }
 
-    // Build a section for each category that has achievements
     groupedAchievements.forEach((type, typeAchievements) {
       if (typeAchievements.isEmpty) return;
 

@@ -28,10 +28,8 @@ class ServiceLocator {
     await SharedPreferences.getInstance();
     await LocalStorageRepository.instance.initialize();
 
-    // Initialize connectivity service
     _connectivityService = ConnectivityService();
 
-    // Initialize sync service after local storage is ready
     _syncService = SyncService(Supabase.instance.client,
         LocalStorageRepository.instance, _connectivityService);
 

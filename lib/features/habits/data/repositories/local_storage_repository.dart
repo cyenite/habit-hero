@@ -18,7 +18,6 @@ class LocalStorageRepository {
   static const String _completionsBoxName = 'completions';
   static const String _syncQueueBoxName = 'sync_queue';
 
-  // Private constructor
   LocalStorageRepository._();
 
   static LocalStorageRepository get instance {

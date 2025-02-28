@@ -78,7 +78,7 @@ class ChallengesPage extends ConsumerWidget {
                       return ChallengeCard(
                         challenge: challenges[index],
                         onTap: () {
-                          // Show details if needed
+                          // TODO(Ron): Show details if needed
                         },
                       );
                     },

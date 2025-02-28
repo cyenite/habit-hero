@@ -36,7 +36,6 @@ class AchievementBadge extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Badge icon
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -54,8 +53,6 @@ class AchievementBadge extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-
-            // Badge name
             Text(
               achievement.name,
               textAlign: TextAlign.center,
@@ -66,11 +63,8 @@ class AchievementBadge extends StatelessWidget {
                     : colorScheme.onSurfaceVariant.withOpacity(0.7),
               ),
             ),
-
             if (showDetails) ...[
               const SizedBox(height: 8),
-
-              // Description
               Text(
                 achievement.description,
                 textAlign: TextAlign.center,
@@ -79,10 +73,7 @@ class AchievementBadge extends StatelessWidget {
                   color: colorScheme.onSurfaceVariant.withOpacity(0.8),
                 ),
               ),
-
               const SizedBox(height: 8),
-
-              // XP reward
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -105,7 +96,6 @@ class AchievementBadge extends StatelessWidget {
                   ),
                 ],
               ),
-
               if (!achievement.unlocked)
                 Container(
                   margin: const EdgeInsets.only(top: 8),

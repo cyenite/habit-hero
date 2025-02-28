@@ -46,7 +46,7 @@ final userMetadataProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
 
     return response;
   } catch (e) {
-    // If the profile doesn't exist yet, return default metadata
+    // Return default metadata if the profile doesn't exist yet.
     return {
       'id': user.id,
       'name':

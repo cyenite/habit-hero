@@ -55,8 +55,6 @@ class GamificationStats extends ConsumerWidget {
                   ),
                 ),
               ),
-
-              // Achievements info
               Expanded(
                 child: achievementsAsync.when(
                   data: (achievements) {
@@ -89,8 +87,6 @@ class GamificationStats extends ConsumerWidget {
                   ),
                 ),
               ),
-
-              // Challenges info
               Expanded(
                 child: challengesAsync.when(
                   data: (challenges) {
