@@ -95,4 +95,64 @@ class AuthRepository {
   Future<void> restoreSession() async {
     await _restoreSession();
   }
+
+  // Add a helper method to format error messages
+  String _formatAuthError(dynamic error) {
+    if (error is supabase.AuthException) {
+      switch (error.statusCode) {
+        case '400':
+          if (error.message.contains('Email not confirmed')) {
+            return 'Please verify your email before signing in';
+          } else if (error.message.contains('Invalid login credentials')) {
+            return 'Invalid email or password';
+          }
+          return 'Invalid request: ${error.message}';
+        case '401':
+          return 'Invalid credentials';
+        case '404':
+          return 'User not found';
+        case '422':
+          if (error.message.contains('already registered')) {
+            return 'Email already in use';
+          }
+          return 'Validation error: ${error.message}';
+        case '429':
+          return 'Too many requests. Please try again later';
+        default:
+          return error.message;
+      }
+    } else if (error.toString().contains('network')) {
+      return 'Network error. Please check your connection';
+    } else if (error.toString().contains('timeout')) {
+      return 'Connection timeout. Please try again';
+    }
+
+    return 'Authentication error: ${error.toString()}';
+  }
+
+  // Then modify your sign in method to use this helper
+  Future<supabase.AuthResponse> signInWithEmailAndPassword(
+      String email, String password) async {
+    try {
+      return await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      throw _formatAuthError(e);
+    }
+  }
+
+  // Do the same for other auth methods
+  Future<supabase.AuthResponse> signUpWithEmailAndPassword(
+      String email, String password) async {
+    try {
+      return await _supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      throw _formatAuthError(e);
+    }
+  }
 }

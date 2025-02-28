@@ -1,5 +1,9 @@
 # Habit Hero
 
+Live Demo: https://habit-hro.web.app
+
+[![Deploy Status](https://github.com/cyenite/habit-hero/actions/workflows/firebase-hosting.yml/badge.svg)](https://github.com/cyenite/habit-hero/actions/workflows/firebase-hosting.yml) [![GitHub Release](https://img.shields.io/github/release/cyenite/habit-hero.svg)](https://github.com/cyenite/habit-hero/releases)
+
 **Transform your life, one habit at a time**
 
 Habit Hero is a comprehensive habit tracking application built with Flutter that helps users build positive habits, track their progress, and stay motivated through gamification elements.
@@ -55,9 +59,17 @@ Habit Hero is a comprehensive habit tracking application built with Flutter that
 1. Clone the repository
 2. Install dependencies `flutter pub get`
 3. Run `flutter pub run build_runner build` to generate the necessary files
-4. Run `flutter run` to start the application
-
-
+4. Configure Google Sign-In:
+   - Create a project in [Google Cloud Console](https://console.cloud.google.com/)
+   - Enable Google Sign-In API
+   - Create OAuth 2.0 credentials
+   - Add your client ID to `web/index.html` in the meta tag:
+     ```html
+     <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+     ```
+   - For Android: Configure the OAuth client ID in your Google Cloud Console and add it to your `android/app/src/main/res/values/strings.xml`
+   - For iOS: Configure the OAuth client ID in your Google Cloud Console and update your `ios/Runner/Info.plist`
+5. Run `flutter run` to start the application
 
 ## 🛠️ Technical Architecture
 

@@ -12,6 +12,17 @@ class ActivityGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final habitsAsync = ref.watch(habitsProvider);
     final completionsAsync = ref.watch(allCompletionsProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Determine grid layout based on screen size
+    final isLargeScreen = screenWidth > 900;
+    final isMediumScreen = screenWidth > 600 && screenWidth <= 900;
+
+    // Adjust crossAxisCount based on screen size
+    final crossAxisCount = isLargeScreen ? 4 : (isMediumScreen ? 3 : 2);
+
+    // Adjust aspect ratio for different screen sizes
+    final childAspectRatio = isLargeScreen ? 1.5 : 1.0;
 
     return habitsAsync.when(
       data: (habits) {
@@ -67,8 +78,12 @@ class ActivityGrid extends ConsumerWidget {
               ),
             );
 
-            // Add cards for top categories (up to 3 more cards)
-            categories.entries.take(3).forEach((entry) {
+            // For web, limit to just enough cards to fill one row
+            // For mobile, keep the original behavior
+            final maxCategories = isLargeScreen ? (crossAxisCount - 1) : 3;
+
+            // Add cards for top categories
+            categories.entries.take(maxCategories).forEach((entry) {
               final category = entry.key;
               final categoryHabits = entry.value;
 
@@ -90,14 +105,18 @@ class ActivityGrid extends ConsumerWidget {
                   icon: category.icon,
                   color: category.color,
                   progress: progress,
-                  showBarChart:
-                      cards.length % 2 == 1, // Alternate between showing chart
+                  showBarChart: cards.length % 2 == 1,
                 ),
               );
             });
 
-            // Ensure we have at least 4 cards for a balanced grid
-            while (cards.length < 4) {
+            // For web, ensure we have exactly one row
+            // For mobile, keep the original behavior
+            final targetCards =
+                isLargeScreen ? crossAxisCount : (isMediumScreen ? 6 : 4);
+
+            // Add "New Habit" card if needed
+            if (cards.length < targetCards) {
               cards.add(
                 InkWell(
                   onTap: () {
@@ -120,15 +139,24 @@ class ActivityGrid extends ConsumerWidget {
               );
             }
 
-            return GridView.count(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1,
-              children: cards,
+            // Limit cards to exactly one row for web
+            if (isLargeScreen && cards.length > crossAxisCount) {
+              cards.length = crossAxisCount;
+            }
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return GridView.count(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: childAspectRatio,
+                  children: cards,
+                );
+              },
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),

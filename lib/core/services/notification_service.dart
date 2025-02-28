@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 
 class NotificationService {
@@ -9,6 +10,12 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static Future<void> initialize() async {
+    // Skip initialization on web or initialize differently
+    if (kIsWeb) {
+      debugPrint('Notifications not supported on web platform');
+      return;
+    }
+
     tz.initializeTimeZones();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -35,7 +42,7 @@ class NotificationService {
     );
 
     // Request permissions for iOS
-    if (Platform.isIOS) {
+    if (!kIsWeb && Platform.isIOS) {
       await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
@@ -53,6 +60,11 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
+    if (kIsWeb) {
+      debugPrint('Notifications not supported on web platform');
+      return;
+    }
+
     await _notificationsPlugin.show(
       id,
       title,
@@ -83,6 +95,11 @@ class NotificationService {
     bool repeats = true,
     String? description,
   }) async {
+    if (kIsWeb) {
+      debugPrint('Scheduled notifications not supported on web platform');
+      return;
+    }
+
     final now = DateTime.now();
     final scheduledDate = DateTime(
       now.year,
@@ -121,10 +138,20 @@ class NotificationService {
   }
 
   static Future<void> cancelNotification(int id) async {
+    if (kIsWeb) {
+      debugPrint('Canceling notifications not supported on web platform');
+      return;
+    }
+
     await _notificationsPlugin.cancel(id);
   }
 
   static Future<void> cancelAllNotifications() async {
+    if (kIsWeb) {
+      debugPrint('Canceling all notifications not supported on web platform');
+      return;
+    }
+
     await _notificationsPlugin.cancelAll();
   }
 }

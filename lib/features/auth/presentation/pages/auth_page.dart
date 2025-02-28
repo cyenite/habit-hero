@@ -76,24 +76,16 @@ class _AuthPageState extends ConsumerState<AuthPage>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final screenSize = MediaQuery.of(context).size;
+    final isLargeScreen = screenSize.width > 900;
+    final isMediumScreen = screenSize.width > 600 && screenSize.width <= 900;
 
     ref.listen<AuthState>(authStateProvider, (previous, next) {
-      if (next.status == AuthStatus.error) {
+      if (next.status == AuthStatus.error && next.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              next.errorMessage ?? 'An error occurred',
-              style: TextStyle(color: Theme.of(context).colorScheme.onError),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: 'Retry',
-              textColor: Theme.of(context).colorScheme.onError,
-              onPressed: () {
-                ref.read(authStateProvider.notifier).signInWithGoogle();
-              },
-            ),
+            content: Text(next.errorMessage!),
+            backgroundColor: Colors.red,
           ),
         );
       } else if (next.status == AuthStatus.authenticated && context.mounted) {
@@ -108,7 +100,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
 
     return Scaffold(
       body: Container(
-        height: MediaQuery.of(context).size.height,
+        height: screenSize.height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -123,31 +115,143 @@ class _AuthPageState extends ConsumerState<AuthPage>
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isLargeScreen ? screenSize.width * 0.1 : 24.0,
+                  vertical: 24.0,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isLargeScreen ? 1200 : 600,
+                  ),
+                  child: isLargeScreen
+                      ? _buildTwoColumnLayout(colorScheme)
+                      : _buildSingleColumnLayout(colorScheme, isMediumScreen),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTwoColumnLayout(ColorScheme colorScheme) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left column - Branding
+        Expanded(
+          flex: 5,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 40.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Welcome to\nHabit Hero',
+                  style: GoogleFonts.poppins(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Transform your life, one habit at a time',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            color: colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Track your daily habits',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            color: colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Visualize your progress',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            color: colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Earn achievements',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Right column - Auth forms
+        Expanded(
+          flex: 4,
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(32.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 40),
-                  Text(
-                    'Welcome to\nHabit Hero',
-                    style: GoogleFonts.poppins(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Transform your life, one habit at a time',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
                   Container(
                     decoration: BoxDecoration(
                       color: colorScheme.surface.withOpacity(0.6),
@@ -193,10 +297,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
                         child: Text(
                           'OR',
                           style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(0.5),
+                            color: colorScheme.onSurface.withOpacity(0.5),
                           ),
                         ),
                       ),
@@ -210,7 +311,88 @@ class _AuthPageState extends ConsumerState<AuthPage>
             ),
           ),
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget _buildSingleColumnLayout(
+      ColorScheme colorScheme, bool isMediumScreen) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 40),
+        Text(
+          'Welcome to\nHabit Hero',
+          style: GoogleFonts.poppins(
+            fontSize: isMediumScreen ? 44 : 40,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Transform your life, one habit at a time',
+          style: GoogleFonts.poppins(
+            fontSize: isMediumScreen ? 18 : 16,
+            color: colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 40),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(
+              color: colorScheme.onSurface.withOpacity(0.1),
+            ),
+          ),
+          child: TabBar(
+            controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.tab,
+            dividerColor: Colors.transparent,
+            indicator: BoxDecoration(
+              color: colorScheme.secondary.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            labelColor: Colors.white,
+            unselectedLabelColor: colorScheme.onSurface.withOpacity(0.7),
+            tabs: const [
+              Tab(text: 'Login'),
+              Tab(text: 'Sign Up'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+        SizedBox(
+          height: 300,
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildLoginForm(),
+              _buildSignUpForm(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            const Expanded(child: Divider()),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'OR',
+                style: TextStyle(
+                  color: colorScheme.onSurface.withOpacity(0.5),
+                ),
+              ),
+            ),
+            const Expanded(child: Divider()),
+          ],
+        ),
+        const SizedBox(height: 24),
+        const GoogleSignInButton(),
+      ],
     );
   }
 

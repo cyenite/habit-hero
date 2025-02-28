@@ -74,26 +74,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String email,
     required String password,
   }) async {
+    state = state.copyWith(status: AuthStatus.loading);
     try {
-      state = state.copyWith(status: AuthStatus.loading);
-
-      final response = await _authRepository.signIn(
-        email: email,
-        password: password,
+      final response = await _authRepository.signInWithEmailAndPassword(
+        email,
+        password,
       );
-
-      if (response.user != null && response.session != null) {
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: response.user,
-          errorMessage: null,
-        );
-      } else {
-        state = state.copyWith(
-          status: AuthStatus.unauthenticated,
-          errorMessage: 'Failed to sign in',
-        );
-      }
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        user: response.user,
+      );
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -107,8 +97,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String password,
     required String name,
   }) async {
+    state = state.copyWith(status: AuthStatus.loading);
     try {
-      state = state.copyWith(status: AuthStatus.loading);
       final response = await _authRepository.signUp(
         email: email,
         password: password,

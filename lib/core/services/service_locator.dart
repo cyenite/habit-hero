@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:habit_tracker/core/config/supabase_config.dart';
@@ -20,12 +21,19 @@ class ServiceLocator {
 
     await Hive.initFlutter();
     await SupabaseConfig.initialize();
-    await dotenv.load();
+
+    if (kIsWeb) {
+      await dotenv.load(fileName: 'env');
+    } else {
+      await dotenv.load(fileName: '.env');
+    }
     await Supabase.initialize(
       url: dotenv.env['SUPABASE_URL']!,
       anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
     );
+
     await SharedPreferences.getInstance();
+
     await LocalStorageRepository.instance.initialize();
 
     _connectivityService = ConnectivityService();
