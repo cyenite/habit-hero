@@ -90,6 +90,40 @@ The app implements a robust offline-first approach:
 2. When online, data is synchronized with Supabase
 3. Conflict resolution strategies ensure data integrity
 
+
+## 🔄 CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration and deployment with the following workflow:
+
+### CI Workflow (on every push and PR)
+1. **Code Checkout**: Retrieves the latest code from the repository
+2. **Environment Setup**: Configures Java and Flutter
+3. **Dependencies**: Installs all project dependencies
+4. **Code Analysis**: Runs Flutter analyzer to ensure code quality
+5. **Unit Testing**: Executes all unit tests to verify functionality
+6. **Environment Configuration**: Sets up environment variables for builds
+7. **Build APK**: Creates a release Android APK
+8. **Build Web**: Creates a release web build
+9. **Artifact Publishing**: Uploads build artifacts for download
+10. **Release Creation**: Creates a GitHub release when pushing to main branch
+
+### CD Workflow (Firebase Deployment)
+A separate workflow deploys the web build to Firebase Hosting:
+
+1. **Code Checkout**: Retrieves the latest code from the repository
+2. **Environment Setup**: Configures Java and Flutter
+3. **Build Web**: Creates a release web build
+4. **Firebase Deployment**: Deploys the web build to Firebase Hosting
+
+These automated workflows ensure that:
+- All code meets quality standards
+- Tests pass on every change
+- Builds are automatically generated
+- Releases are properly versioned
+- Web deployments happen automatically
+
+To view workflow runs and artifacts, visit the Actions tab in the GitHub repository.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
