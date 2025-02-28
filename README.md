@@ -1,7 +1,5 @@
 # Habit Hero
 
-Link to the web version: https://habit-hro.web.app/
-
 **Transform your life, one habit at a time**
 
 Habit Hero is a comprehensive habit tracking application built with Flutter that helps users build positive habits, track their progress, and stay motivated through gamification elements.
