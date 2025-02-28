@@ -7,7 +7,7 @@ class GoogleSignInButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         ref.read(authStateProvider.notifier).signInWithGoogle();
       },

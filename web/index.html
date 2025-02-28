@@ -31,13 +31,33 @@
   <link rel="icon" type="image/png" href="favicon.png" />
 
   <meta name="google-signin-client_id"
-    content="474994024182-ka6kh4nprabrla21eim94stutag2740a.apps.googleusercontent.com">
+    content="474994024182-gv7242p2k9sg87fn57cgfte3u8envgfl.apps.googleusercontent.com">
 
   <title>habit_tracker</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
 </head>
 
 <body>
+  <!-- Initialize Firebase before flutter_bootstrap.js -->
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZnXUZSLHSFxrYIKlQXg3LqTwGhm8SnQA",
+      authDomain: "habit-hro.firebaseapp.com",
+      projectId: "habit-hro",
+      storageBucket: "habit-hro.appspot.com",
+      messagingSenderId: "554449466358",
+      appId: "1:554449466358:web:51c8e6a5e9e3f8a9f9f9f9"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 

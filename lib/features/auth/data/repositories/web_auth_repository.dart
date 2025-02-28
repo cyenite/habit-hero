@@ -1,18 +1,41 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:habit_tracker/features/auth/data/repositories/web_auth_repository.dart';
 
-class SocialAuthRepository {
+class WebAuthRepository {
   final SupabaseClient _supabase;
-  late WebAuthRepository _webAuthRepository;
 
-  SocialAuthRepository(this._supabase) {
-    if (kIsWeb) {
-      _webAuthRepository = WebAuthRepository(_supabase);
+  WebAuthRepository(this._supabase);
+
+  Future<AuthResponse> signInWithGoogleWeb() async {
+    if (!kIsWeb) {
+      throw 'This method is only available on web platforms';
+    }
+
+    try {
+      // Get the current URL
+      final currentUrl = Uri.base;
+
+      // Construct the redirect URL based on the current domain
+      final redirectUrl =
+          '${currentUrl.scheme}://${currentUrl.host}${currentUrl.port != 80 && currentUrl.port != 443 ? ':${currentUrl.port}' : ''}';
+
+      // Use Supabase's OAuth sign-in for web with explicit redirect
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: redirectUrl,
+      );
+
+      // Create a dummy AuthResponse since we can't get a real one on web
+      // The actual session will be handled by Supabase's redirect flow
+      return AuthResponse(
+        session: null,
+        user: null,
+      );
+    } catch (error) {
+      throw _formatAuthError(error);
     }
   }
 
-  // Helper method to format error messages
   String _formatAuthError(dynamic error) {
     if (error is AuthException) {
       switch (error.statusCode) {
@@ -46,24 +69,5 @@ class SocialAuthRepository {
     }
 
     return 'Authentication error: ${error.toString()}';
-  }
-
-  Future<AuthResponse> signInWithGoogle() async {
-    try {
-      if (kIsWeb) {
-        return await _webAuthRepository.signInWithGoogleWeb();
-      }
-
-      await _supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-      );
-
-      return AuthResponse(
-        session: null,
-        user: null,
-      );
-    } catch (error) {
-      throw _formatAuthError(error);
-    }
   }
 }
