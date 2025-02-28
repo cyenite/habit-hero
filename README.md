@@ -2,7 +2,7 @@
 
 Live Demo: https://habit-hro.web.app
 
-[![Deploy Status](https://github.com/cyenite/habit-hero/actions/workflows/firebase-hosting.yml/badge.svg)](https://github.com/cyenite/habit-hero/actions/workflows/firebase-hosting.yml) [![GitHub Release](https://img.shields.io/github/release/cyenite/habit-hero.svg)](https://github.com/cyenite/habit-hero/releases)
+[![Deploy Status](https://github.com/cyenite/habit-hero/actions/workflows/firebase-ci.yml/badge.svg)](https://github.com/cyenite/habit-hero/actions/workflows/firebase-ci.yml) [![GitHub Release](https://img.shields.io/github/release/cyenite/habit-hero.svg)](https://github.com/cyenite/habit-hero/releases)
 
 **Transform your life, one habit at a time**
 
