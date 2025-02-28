@@ -77,6 +77,7 @@ class SocialAuthRepository {
       if (kIsWeb) {
         return await _webAuthRepository.signInWithGoogleWeb();
       }
+
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) throw 'Google sign in cancelled';
 

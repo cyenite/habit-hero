@@ -65,18 +65,7 @@ jobs:
       with:
         name: release-apk
         path: build/app/outputs/flutter-apk/app-release.apk
-    
-    - name: Build Web
-      run: |
-        flutter config --enable-web
-        flutter build web --release --no-tree-shake-icons
-    
-    - name: Upload Web Build as workflow artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: web-build
-        path: build/web/
-        
+
     - name: Get app version
       id: app_version
       run: |
